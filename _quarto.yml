@@ -7,6 +7,10 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - text: Articles
+        menu:
+          - text: "Archived but not lost"
+            href: cran-archiving-stats.html
       - about.qmd
 
     right:
