@@ -2,10 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://cranhaven.github.io/cranhaven.org/about.html</loc>
-    <lastmod>2024-03-08T18:59:09.283Z</lastmod>
+    <lastmod>2024-03-08T19:07:40.253Z</lastmod>
   </url>
   <url>
     <loc>https://cranhaven.github.io/cranhaven.org/index.html</loc>
-    <lastmod>2024-03-08T18:59:09.283Z</lastmod>
+    <lastmod>2024-03-08T19:07:40.253Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cranhaven.github.io/cranhaven.org/cran-archiving-stats.html</loc>
+    <lastmod>2024-03-08T19:07:40.253Z</lastmod>
   </url>
 </urlset>
