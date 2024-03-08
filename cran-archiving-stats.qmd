@@ -84,14 +84,17 @@ history_df$action[grep("Back on CRAN", history_df$comment, ignore.case = TRUE)] 
 library("reactable")
 history <- rbind(comments_df, history_df) |> 
   mutate(action = gsub(pattern = "e$", replacement = "ed", action)) |> 
-  arrange(package) |> 
+  arrange(package) |>
+  relocate(date) |>
+  relocate(comment, .after = last_col()) |>
   filter(action %in% c("archived", "unarchived"),
          !is.na(date),
          !is.na(action)) 
-  
+
+
 # Show only the last 40 days
 history |> 
-  filter(date > (Sys.Date() - 40)) |> 
+  filter(date > (Sys.Date() - 40)) |>
   reactable(
     columns = list(
       action = colDef(style = function(value) {
@@ -102,7 +105,7 @@ history |>
           list()
         }
       })),
-    defaultSorted = list("date" = "desc"),
+    defaultSorted = list("date" = "desc", "package" = "asc"),
     filterable = TRUE,
     defaultPageSize = 50)
 ```
