@@ -1,1 +1,1 @@
-Sitemap: https://cranhaven.github.io/cranhaven.org/sitemap.xml
+Sitemap: https://www.cranhaven.org/sitemap.xml
