@@ -11,7 +11,7 @@
     "href": "index.html",
     "title": "CRANhaven",
     "section": "",
-    "text": "Warning\n\n\n\nThis is work under development! Please do not rely on it for production and do not add CRANhaven to Additional_repositories_ of your package.\nThe CRANhaven R package repository, available on R-universe, hosts packages that were recently archived on CRAN1. Those packages can be installed using:\nPackages remain on CRANhaven for up to four weeks, or until they are unarchived on CRAN."
+    "text": "Warning\n\n\n\nThis is work under development! Please do not rely on it for production and do not add CRANhaven to Additional_repositories of your package.\nThe CRANhaven R package repository, available on R-universe, hosts packages that were recently archived on CRAN1. Those packages can be installed using:\nPackages remain on CRANhaven for up to four weeks, or until they are unarchived on CRAN."
   },
   {
     "objectID": "index.html#motivation",
