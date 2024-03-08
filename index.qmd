@@ -1,5 +1,5 @@
 ---
-title: "."
+title: "CRAN Haven - Repository for Recently Archived CRAN Packages"
 ---
 
 This is a Quarto website.
