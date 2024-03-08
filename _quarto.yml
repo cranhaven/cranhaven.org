@@ -1,0 +1,35 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "CRAN Haven"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - about.qmd
+
+    right:
+      - icon: github
+        href: https://github.com/cranhaven/cranhaven.org/
+        aria-label: GitHub
+ 
+  search: 
+    location: navbar
+    type: overlay
+    
+  repo-url: https://github.com/cranhaven/cranhaven.org/
+  repo-actions: [source, edit, issue]
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+execute:
+  freeze: auto
+
+
+
