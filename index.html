@@ -167,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
   <li><a href="#known-limitations" id="toc-known-limitations" class="nav-link" data-scroll-target="#known-limitations">Known Limitations</a></li>
-  <li><a href="#details" id="toc-details" class="nav-link" data-scroll-target="#details">Details</a></li>
+  <li><a href="#under-the-hood" id="toc-under-the-hood" class="nav-link" data-scroll-target="#under-the-hood">Under the Hood</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/cranhaven/cranhaven.org/blob/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/cranhaven/cranhaven.org/edit/main/index.qmd" class="toc-action"><i class="bi empty"></i>Edit this page</a></li><li><a href="https://github.com/cranhaven/cranhaven.org/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -207,7 +207,7 @@ Warning
 <p>This is work under development! Please do <em>not</em> rely on it for production and do <em>not</em> add CRANhaven to <code>Additional_repositories_</code> of your package.</p>
 </div>
 </div>
-<p>The <strong><a href="https://cranhaven.r-universe.dev">CRANhaven</a></strong> R package repository, available on R-universe, hosts packages that were recently archived on CRAN. Those packages can be installed using:</p>
+<p>The <strong><a href="https://cranhaven.r-universe.dev">CRANhaven</a></strong> R package repository, available on R-universe, hosts packages that were recently archived on CRAN<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Those packages can be installed using:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">c</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>, <span class="st">"https://cloud.r-project.org"</span>),</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"https://cranhaven.r-universe.dev"</span>))</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"somepkg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -233,15 +233,20 @@ Warning
 <h2 class="anchored" data-anchor-id="known-limitations">Known Limitations</h2>
 <p>Some of the CRANhaven packages fail to build temporarily only because they depend on another archived CRAN package, which still has not been built on CRANhaven. This will normally resolve itself after a few hours; R-universe re-synchronize once an hour and it might require a few rounds for all packages to be built.</p>
 </section>
-<section id="details" class="level2">
-<h2 class="anchored" data-anchor-id="details">Details</h2>
+<section id="under-the-hood" class="level2">
+<h2 class="anchored" data-anchor-id="under-the-hood">Under the Hood</h2>
 <p>This repository is <a href="https://github.com/r-universe/cranhaven/actions">updated</a> <a href="https://github.com/cranhaven/cranhaven.r-universe.dev/blob/main/.github/workflows/update.yml">once an hour</a>. It queries <a href="https://dirk.eddelbuettel.com/cranberries/cran/removed/">CRANberries</a> for recently archived packages, ignores the ones that have been archived for more than four weeks, or that have since be unarchived on CRAN. The source for the packages built on the CRANhaven R-universe is <a href="https://github.com/cran" class="uri">https://github.com/cran</a>.</p>
-<p>The “Commit” datestamps seen on <a href="https://cranhaven.r-universe.dev">CRANhaven</a> show the dates (±1 day) when the packages were archived on CRAN.</p>
 
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
