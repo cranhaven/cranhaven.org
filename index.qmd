@@ -1,11 +1,11 @@
 ---
 title: "CRANhaven"
-subtitle: "A Repository for Recently Archived CRAN Packages"
+subtitle: "A repository for recently archived CRAN packages"
 ---
 
 ::: {.callout-warning}
 
-⚠️ This is work under development! Please do _not_ rely on it for
+This is work under development! Please do _not_ rely on it for
 production and do _not_ add CRANhaven to `Additional_repositories_` of
 your package.
 
@@ -31,7 +31,7 @@ unarchived on CRAN.
 <div>
 
 <div style="float: right; padding-bottom: 2ex; padding-left: 2ex; width: 50%;">
-![](assets/cranhaven-art.webp){fig-alt="Image depicting a dramatic and stylized seascape. There is a large, cliff-like formation on the left with water cascading down its side, simulating a waterfall. On the right, a massive, vertical wall with the words 'CRAN HAVEN' written on it creates a stark contrast with the natural features. The wall appears to be constructed out of container-like structures, suggesting a man-made barrier or perhaps an installation by the sea. In the water, several ships are visible at varying distances from the viewer, likely representing different types of fishing or sailing vessels. They add a sense of scale and activity to the scene. Above, the sky is filled with textured clouds, and sunbeams break through them, casting a warm light on the ocean and parts of the cliffs, which creates a visually striking effect. The overall atmosphere is one of a surreal blend between the natural world and human influence, possibly implying a safe harbor or refuge symbolized by the words on the wall. The art style is reminiscent of a digital painting, with a high level of detail and a dramatic interplay of light and shadow."}
+![CRANhaven is where recently archived CRAN packages can find shelter and get time for maintenance](assets/cranhaven-art.webp){fig-alt="Image depicting a dramatic and stylized seascape. There is a large, cliff-like formation on the left with water cascading down its side, simulating a waterfall. On the right, a massive, vertical wall with the words 'CRAN HAVEN' written on it creates a stark contrast with the natural features. The wall appears to be constructed out of container-like structures, suggesting a man-made barrier or perhaps an installation by the sea. In the water, several ships are visible at varying distances from the viewer, likely representing different types of fishing or sailing vessels. They add a sense of scale and activity to the scene. Above, the sky is filled with textured clouds, and sunbeams break through them, casting a warm light on the ocean and parts of the cliffs, which creates a visually striking effect. The overall atmosphere is one of a surreal blend between the natural world and human influence, possibly implying a safe harbor or refuge symbolized by the words on the wall. The art style is reminiscent of a digital painting, with a high level of detail and a dramatic interplay of light and shadow."}
 </div>
 
 Sometimes a package gets archived only because the maintainer did not
