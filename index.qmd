@@ -13,8 +13,8 @@ your package.
 
 
 The **[CRANhaven]** R package repository, available on R-universe,
-hosts packages that were recently archived on CRAN. Those packages can
-be installed using:
+hosts packages that were recently archived on CRAN[^1]. Those packages
+can be installed using:
 
 ```r
 options(repos = c(getOption("repos", "https://cloud.r-project.org"),
@@ -24,6 +24,9 @@ install.packages("somepkg")
 
 Packages remain on CRANhaven for up to four weeks, or until they are
 unarchived on CRAN.
+
+[^1]: The "Commit" datestamps seen on R-universe show the dates (±1
+day) when the packages were archived on CRAN.
 
 
 ## Motivation
@@ -69,7 +72,7 @@ hours; R-universe re-synchronize once an hour and it might require a
 few rounds for all packages to be built.
 
 
-## Details
+## Under the Hood
 
 This repository is
 [updated](https://github.com/r-universe/cranhaven/actions) [once an
@@ -80,9 +83,6 @@ for recently archived packages, ignores the ones that have been
 archived for more than four weeks, or that have since be unarchived on
 CRAN. The source for the packages built on the CRANhaven R-universe is
 <https://github.com/cran>.
-
-The "Commit" datestamps seen on [CRANhaven] show the dates (±1 day)
-when the packages were archived on CRAN.
 
 
 [CRANhaven]: https://cranhaven.r-universe.dev
