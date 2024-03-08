@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "CRAN Haven"
+  title: "CRANhaven"
   navbar:
     left:
       - href: index.qmd

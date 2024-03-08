@@ -1,5 +1,5 @@
 ---
-title: "CRAN Haven"
+title: "CRANhaven"
 subtitle: "A Repository for Recently Archived CRAN Packages"
 ---
 
@@ -17,14 +17,22 @@ hosts packages that were recently archived on CRAN. Those packages can
 be installed using:
 
 ```r
-install.packages("somepkg", repos = c(getOption("repos", "https://cloud.r-project.org"), "https://cranhaven.r-universe.dev"))
+options(repos = c(getOption("repos", "https://cloud.r-project.org"),
+                  "https://cranhaven.r-universe.dev"))
+install.packages("somepkg")
 ```
 
-Packages remains on CRANhaven for up to four weeks, or until they are
+Packages remain on CRANhaven for up to four weeks, or until they are
 unarchived on CRAN.
 
 
 ## Motivation
+
+<div>
+
+<div style="float: right; padding-bottom: 2ex; padding-left: 2ex; width: 50%;">
+![](assets/cranhaven-art.webp){fig-alt="Image depicting a dramatic and stylized seascape. There is a large, cliff-like formation on the left with water cascading down its side, simulating a waterfall. On the right, a massive, vertical wall with the words 'CRAN HAVEN' written on it creates a stark contrast with the natural features. The wall appears to be constructed out of container-like structures, suggesting a man-made barrier or perhaps an installation by the sea. In the water, several ships are visible at varying distances from the viewer, likely representing different types of fishing or sailing vessels. They add a sense of scale and activity to the scene. Above, the sky is filled with textured clouds, and sunbeams break through them, casting a warm light on the ocean and parts of the cliffs, which creates a visually striking effect. The overall atmosphere is one of a surreal blend between the natural world and human influence, possibly implying a safe harbor or refuge symbolized by the words on the wall. The art style is reminiscent of a digital painting, with a high level of detail and a dramatic interplay of light and shadow."}
+</div>
 
 Sometimes a package gets archived only because the maintainer did not
 have time to address the issues before the deadline given by
@@ -49,6 +57,7 @@ it is added to this repository. If the packages is fixed and
 package is not unarchived on CRAN within four weeks, it is removed
 from this repository. This gives R users, developers, and
 reverse-dependency maintainers some extra leeway.
+</div>
 
 
 ## Known Limitations
@@ -64,7 +73,7 @@ few rounds for all packages to be built.
 
 This repository is
 [updated](https://github.com/r-universe/cranhaven/actions) [once an
-hour](https://github.com/CRANhaven/cranhaven.r-universe.dev/blob/main/.github/workflows/update.yml). It
+hour](https://github.com/cranhaven/cranhaven.r-universe.dev/blob/main/.github/workflows/update.yml). It
 queries
 [CRANberries](https://dirk.eddelbuettel.com/cranberries/cran/removed/)
 for recently archived packages, ignores the ones that have been
