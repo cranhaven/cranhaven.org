@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
   echo = FALSE
 )
 
-max_days <- 4*7
+max_days <- 5*7
 ```
 
 CRAN packages are often archived and equally often after being taken
