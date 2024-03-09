@@ -9,7 +9,7 @@ website:
         text: Home
       - text: Articles
         menu:
-          - text: "Dashboard: Archived CRAN Packages"
+          - text: "Dashboard: Recently Archived CRAN Packages"
             href: cran-archived-dashboard.html
           - text: "Study: Many Archived Packages Return to CRAN"
             href: cran-archiving-stats.html

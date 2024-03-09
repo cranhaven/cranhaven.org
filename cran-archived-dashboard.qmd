@@ -1,5 +1,5 @@
 ---
-title: "Dashboard: Archived CRAN Packages"
+title: "Dashboard: Recently Archived CRAN Packages"
 ---
 
 ```{r setup, include = FALSE}
