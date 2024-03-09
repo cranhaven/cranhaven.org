@@ -11,14 +11,14 @@
     "href": "index.html",
     "title": "CRANhaven",
     "section": "",
-    "text": "Warning\n\n\n\nThis is work under development! Please do not rely on it for production and do not add CRANhaven to Additional_repositories of your package.\nThe CRANhaven R package repository, available on R-universe, hosts packages that were recently archived on CRAN1. Those packages can be installed using:\nPackages remain on CRANhaven for up to four weeks, or until they are unarchived on CRAN."
+    "text": "Warning\n\n\n\nThis is work under development! Please do not rely on it for production and do not add CRANhaven to Additional_repositories of your package.\nThe CRANhaven R package repository, available on R-universe, hosts packages that were recently archived on CRAN1. Those packages can be installed using:\nPackages remain on CRANhaven for up to five weeks2, or until they are unarchived on CRAN."
   },
   {
     "objectID": "index.html#motivation",
     "href": "index.html#motivation",
     "title": "CRANhaven",
     "section": "Motivation",
-    "text": "Motivation\n\n\n\n\n\nCRANhaven is where recently archived CRAN packages can find shelter and get time for maintenance\n\n\n\nSometimes a package gets archived only because the maintainer did not have time to address the issues before the deadline given by CRAN. Sometimes the deadline is as short as two weeks. In Revilla (2022), it was found that 36% of all archived CRAN package get “unarchived” again at some point in the future. Our results show that the median time for an archived package to reappear on CRAN is ~30 days.\nThe impact of a CRAN package being archived depends on the package, and how widely used it is, and how many packages depend on it. In some cases it can be rather disruptive for R users and developers when one or more packages are archived on CRAN.\nImportantly, any package that has a hard dependency (e.g. Depends: and Imports:) on an archived package will automatically be archived too. There is little a developer that is a “victim” of this can do, other than doing a major rewrite, which is only reasonable to do if the developer knows that the archived package will not be fixed anytime soon.\nThe purpose of this R package repository is to give archived CRAN packages a second chance. As soon as the package is archived on CRAN, it is added to this repository. If the packages is fixed and “unarchived” on CRAN, it is removed from this repository. If the package is not unarchived on CRAN within four weeks, it is removed from this repository. This gives R users, developers, and reverse-dependency maintainers some extra leeway."
+    "text": "Motivation\n\n\n\n\n\nCRANhaven is where recently archived CRAN packages can find shelter and get time for maintenance\n\n\n\nSometimes a package gets archived only because the maintainer did not have time to address the issues before the deadline given by CRAN. Sometimes the deadline is as short as two weeks. In Revilla (2022), it was found that 36% of all archived CRAN package get “unarchived” again at some point in the future. Our results show that the median time for an archived package to reappear on CRAN is ~30 days.\nThe impact of a CRAN package being archived depends on the package, and how widely used it is, and how many packages depend on it. In some cases it can be rather disruptive for R users and developers when one or more packages are archived on CRAN.\nImportantly, any package that has a hard dependency (e.g. Depends: and Imports:) on an archived package will automatically be archived too. There is little a developer that is a “victim” of this can do, other than doing a major rewrite, which is only reasonable to do if the developer knows that the archived package will not be fixed anytime soon.\nThe purpose of this R package repository is to give archived CRAN packages a second chance. As soon as the package is archived on CRAN, it is added to this repository. If the packages is fixed and “unarchived” on CRAN, it is removed from this repository. If the package is not unarchived on CRAN within five weeks, it is removed from this repository. This gives R users, developers, and reverse-dependency maintainers some extra leeway."
   },
   {
     "objectID": "index.html#known-limitations",
@@ -32,21 +32,21 @@
     "href": "index.html#under-the-hood",
     "title": "CRANhaven",
     "section": "Under the Hood",
-    "text": "Under the Hood\nThis repository is updated once an hour. It queries CRANberries for recently archived packages, ignores the ones that have been archived for more than four weeks, or that have since be unarchived on CRAN. The source for the packages built on the CRANhaven R-universe is https://github.com/cran."
+    "text": "Under the Hood\nThis repository is updated once an hour. It queries CRANberries for recently archived packages, ignores the ones that have been archived for more than five weeks, or that have since be unarchived on CRAN. The source for the packages built on the CRANhaven R-universe is https://github.com/cran."
   },
   {
     "objectID": "index.html#footnotes",
     "href": "index.html#footnotes",
     "title": "CRANhaven",
     "section": "Footnotes",
-    "text": "Footnotes\n\n\nThe “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.↩︎"
+    "text": "Footnotes\n\n\nThe “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.↩︎\nThe five-week limit is based on our results showing that the median time for a package to return to CRAN is 30 days.↩︎"
   },
   {
     "objectID": "cran-archived-dashboard.html",
     "href": "cran-archived-dashboard.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "",
-    "text": "CRAN packages are often archived and equally often after being taken off CRAN they can be brought up to CRAN.\nThis dashboard updates with the latest 28 days of CRAN archived or unarchived packages from PACKAGES.in the CRAN Team uses to document this process.\nTo avoid being archived, make sure to fix any package issues in time. If you don’t think you can reach the deadline you got, you might be able to convince the CRAN maintainers to extend the deadline. It is also useful to review CRAN Repository Policy once in a while to stay up to date with the CRAN requirements.\nIf your package has already been archived, you can get back to CRAN by fixing the issues pointed on the initial email, as well as any other new issue that might show up. Check the package before sending it and explain to the volunteers how you fixed it. If you have problems you don’t know how to solve, you can search for a solution in the r-package-devel mailing list and ask there for help with the package development."
+    "text": "CRAN packages are often archived and equally often after being taken off CRAN they can be brought up to CRAN.\nThis dashboard updates with the latest 35 days of CRAN archived or unarchived packages from PACKAGES.in the CRAN Team uses to document this process.\nTo avoid being archived, make sure to fix any package issues in time. If you don’t think you can reach the deadline you got, you might be able to convince the CRAN maintainers to extend the deadline. It is also useful to review CRAN Repository Policy once in a while to stay up to date with the CRAN requirements.\nIf your package has already been archived, you can get back to CRAN by fixing the issues pointed on the initial email, as well as any other new issue that might show up. Check the package before sending it and explain to the volunteers how you fixed it. If you have problems you don’t know how to solve, you can search for a solution in the r-package-devel mailing list and ask there for help with the package development."
   },
   {
     "objectID": "cran-archiving-stats.html",
