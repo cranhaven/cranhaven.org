@@ -9,7 +9,9 @@ website:
         text: Home
       - text: Articles
         menu:
-          - text: "Archived but not lost"
+          - text: "Dashboard: Archived CRAN Packages"
+            href: cran-archived-dashboard.html
+          - text: "Study: Many Archived Packages Return to CRAN"
             href: cran-archiving-stats.html
       - about.qmd
 
