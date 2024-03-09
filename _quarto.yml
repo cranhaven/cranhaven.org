@@ -25,7 +25,7 @@ website:
     type: overlay
 
   margin-header: |
-    <img src="https://cranhaven.r-universe.dev/badges/:total" alt="CRANhaven number of packages"/>
+    <a href="https://cranhaven.r-universe.dev/builds"><img src="https://cranhaven.r-universe.dev/badges/:total" alt="CRANhaven number of packages"/></a>
 
   repo-url: https://github.com/cranhaven/cranhaven.org/
   repo-actions: [source, edit, issue]
