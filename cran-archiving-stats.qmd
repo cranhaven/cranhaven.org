@@ -179,7 +179,8 @@ pw |> summarise(.by = times_archived,
 ### Return time for packages archived only once in their lifetime
 
 ```{r plot-ecdf}
-#| fig-cap: "ECDF of the time packaages get back to CRAN. Days vs % of packages back on CRAN."
+#| fig-cap: "Empirical distribution of the time it takes packages to get
+#| unarchived as a function of number of days since being archived on CRAN."
 library("ggplot2")
 pw |> 
   filter(times_archived == "1") |>
@@ -200,7 +201,12 @@ pw |>
 ### Cumulative number of archived packages over the years
 
 ```{r plot-cumulative}
-#| fig-cap: "Packages situation in CRAN altered. Each line represents an action by the CRAN team. On the left the raw counts of cumulative , on the right the same in logarithmic scale."
+#| fig-cap: "**Packages actions done by the CRAN Team over time**.
+#| The CRAN Team may take different actions for packages currently on
+#| e.g. archived (solid red), orphaned (dotted yellow), removed
+#| (dashed green), renamed (dashed blue), and unarchived (dotted purple).
+#| Presented is the cumulative number of such events over time on the linear
+#| (left) and the logarithmic (right) scale."
 library("patchwork")
 p <- full_history |> 
   filter(!is.na(action), !is.na(date)) |> 
@@ -221,7 +227,7 @@ p + scale_y_continuous(expand = expansion()) +
   p + scale_y_log10(guide = "axis_logticks", expand = expansion(), 
                     breaks = c(1, 100, 2500, 5000, 7500, 10000)) +
   plot_annotation(
-    title = "Accumulation of actions on pacakges",
+    title = "Accumulation of actions on packages",
   ) +
   plot_layout(guides = 'collect', axes = "collect") &
   theme(legend.position='bottom')
@@ -231,8 +237,11 @@ p + scale_y_continuous(expand = expansion()) +
 ### Days to return versus date when archived
 
 ```{r plot-events}
-#| fig-cap: "Packages being archived and returning to CRAN. 
-#| The points are packages, when they were archived from CRAN vs when they returned. 
+#| fig-cap: "**Packages being archived and returning to CRAN.**
+#| Each data point represents when a CRAN package was archived (horizontal
+#| axis) and when it was unarchived (vertical axis).
+#| If more than one package was archive and unarchived on the same dates,
+#| the corresponding data point is presented as a larger disk.
 #| The gray dashed line is the event horizon."
 pw |> 
   ggplot() +
@@ -253,8 +262,8 @@ pw |>
 ### Distribution of number of days for packages to return to CRAN
 
 ```{r plot-distribution}
-#| fig-cap: "**Histogram of packages by the time they are off CRAN**. 
-#| Each bar represents a week. Most packages are less than a month off CRAN."
+#| fig-cap: "**Histogram of how long packages remain archived on CRAN**. 
+#| Each bar represents a week. Most packages return to CRAN within a month."
 pw |> 
   ggplot() +
   geom_histogram(aes(timediff), binwidth = 7) +
