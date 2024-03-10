@@ -13,7 +13,8 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r, echo = FALSE}
+```{r cran-history, echo = FALSE}
+# Searches packages in PACKAGES.in file and extracts relevant information.
 library("dplyr")
 url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
 con <- url(url)
@@ -72,7 +73,7 @@ history <- filter(full_history, action %in% c("archived", "unarchived"),
                   !is.na(action)) 
 ```
 
-```{r, echo = FALSE}
+```{r search-cran-archive, echo = FALSE}
 archive <- tools:::CRAN_archive_db()
 pkges <- unique(history$package[history$action %in% c("archived", "unarchived")])
 
@@ -97,12 +98,13 @@ packages <- rbind(archive_df, relevant_current) |>
 rownames(packages) <- NULL
 ```
 
-```{r, echo = FALSE}
+```{r merge, echo = FALSE}
+# Merge history and packages in archive
 out <- merge(packages, history, all = TRUE, sort = FALSE) |> 
   arrange(package, date) 
 ```
 
-```{r, echo = FALSE}
+```{r no-weird, echo = FALSE}
 # There is no package that the unarchived date isn't recorded as new
 void <- out |> 
   summarise(.by = package, 
@@ -113,7 +115,7 @@ void <- out |>
 stopifnot(NROW(void) == 0L)
 ```
 
-```{r, echo = FALSE}
+```{r weird-packages, echo = FALSE}
 # Packages with problems with annotation about being archived
 over_unarchived <- out |> 
   summarise(.by = package,
@@ -122,7 +124,7 @@ over_unarchived <- out |>
   pull(package)
 ```
 
-```{r, echo = FALSE}
+```{r history-back, echo = FALSE}
 more <- out |> 
   filter(action != "unarchived") |> 
   filter(!package %in% over_unarchived) |> 
@@ -158,14 +160,15 @@ median time for these packages to return to CRAN is ~30 days.
 
 ### Summary of how long it takes packages to be unarchived
 
-```{r}
+```{r table-times}
+#| tbl-cap: "Table with Summary statistics of time to get back to CRAN."
 fiu <- function(x){is(x, "difftime")}
 pw |> summarise(.by = times_archived, 
                 packages = n(), 
                 min = min(timediff), 
                 q1 = quantile(timediff, 0.25), 
                 mean = mean(timediff), 
-                mdeian = median(timediff), 
+                median = median(timediff), 
                 q3 = quantile(timediff, 0.75), 
                 max = max(timediff)) |> 
   mutate(across(where(fiu), round)) |> 
@@ -175,10 +178,11 @@ pw |> summarise(.by = times_archived,
 
 ### Return time for packages archived only once in their lifetime
 
-```{r}
+```{r plot-ecdf}
+#| fig-cap: "ECDF of the time packaages get back to CRAN. Days vs % of packages back on CRAN."
 library("ggplot2")
 pw |> 
-  filter(times_archived == "1") |> 
+  filter(times_archived == "1") |>
   ggplot() +
   stat_ecdf(aes(timediff)) +
   coord_cartesian(xlim =  c(0, 365), expand = FALSE) +
@@ -196,6 +200,7 @@ pw |>
 ### Cumulative number of archived packages over the years
 
 ```{r}
+#| fig-cap: "Packages situation in CRAN altered. Each line represents an action by the CRAN team. On the left the raw counts of cumulative , on the right the same in logarithmic scale."
 library("patchwork")
 p <- full_history |> 
   filter(!is.na(action), !is.na(date)) |> 
@@ -213,7 +218,8 @@ p <- full_history |>
        y = "Total number of packages"
   )
 p + scale_y_continuous(expand = expansion()) + 
-  p + scale_y_log10(guide = "axis_logticks", expand = expansion()) +
+  p + scale_y_log10(guide = "axis_logticks", expand = expansion(), 
+                    breaks = c(1, 100, 2500, 5000, 7500, 10000)) +
   plot_annotation(
     title = "Accumulation of actions on pacakges",
   ) +
@@ -224,7 +230,10 @@ p + scale_y_continuous(expand = expansion()) +
 
 ### Days to return versus date when archived
 
-```{r}
+```{r plot-events}
+#| fig-cap: "Packages being archived and returning to CRAN. 
+#| The points are packages, when they were archived from CRAN vs when they returned. 
+#| The gray dashed line is the event horizon."
 pw |> 
   ggplot() +
   geom_count(aes(archived, timediff)) +
@@ -236,20 +245,23 @@ pw |>
   scale_y_continuous(expand = expansion(c(0, NA), c(0, NA))) +
   labs(x = "Date when the package was archived",
        y = "Time until it went back to CRAN",
-       title = "Time till archived packages are back to CRAN")
+       title = "Time till archived packages are back to CRAN",
+       size = "Packages")
 ```
 
 
 ### Distribution of number of days for packages to return to CRAN
 
-```{r}
+```{r plot-distribution}
+#| fig-cap: "**Histogram of packages by the time they are off CRAN**. 
+#| Each bar represents a week. Most packages are less than a month off CRAN."
 pw |> 
   ggplot() +
   geom_histogram(aes(timediff), binwidth = 7) +
   theme_minimal() +
   scale_y_continuous(expand = expansion(c(0, NA), c(0, NA))) +
   labs(y = "Packages that got back",
-       x = "Time until it went back to CRAN",
+       x = "days",
        title = "Time till packages are back to CRAN")
 ```
 
