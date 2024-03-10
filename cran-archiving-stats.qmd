@@ -148,9 +148,9 @@ pw <- more |>
 
 CRAN packages are archived all the time, but a large portion of them
 eventually gets fixed and return to CRAN.  Using public data available
-from different resources on CRAN[^1], we have found that 36% of the
+from different resources[^1] on CRAN, we have found that 36% of the
 archived packages get unarchived at some point [@revilla_2022]. The
-median time for these packages to return to CRAN is ~30 days.
+median time for these packages to return to CRAN is ~33 days.
 
 [^1]: Data sources used are `tools:::CRAN_current_db()`,
 `tools:::CRAN_archive_db()`, and [PACKAGES.in].
