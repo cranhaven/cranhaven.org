@@ -193,8 +193,8 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
 <section id="summary-of-how-long-it-takes-packages-to-be-unarchived" class="level3">
 <h3 class="anchored" data-anchor-id="summary-of-how-long-it-takes-packages-to-be-unarchived">Summary of how long it takes packages to be unarchived</h3>
-<div class="cell">
-<pre><code>#&gt;   times_archived packages     min      q1     mean  mdeian       q3       max
+<div class="cell" data-tbl-cap="Table with Summary statistics of time to get back to CRAN.">
+<pre><code>#&gt;   times_archived packages     min      q1     mean  median       q3       max
 #&gt; 1              1     3653  1 days  9 days 121 days 33 days 120 days 3292 days
 #&gt; 2              2      769  1 days  8 days  91 days 27 days  87 days 1949 days
 #&gt; 3              3      203  1 days  6 days  80 days 22 days  76 days  882 days
@@ -207,9 +207,10 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="return-time-for-packages-archived-only-once-in-their-lifetime">Return time for packages archived only once in their lifetime</h3>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="cran-archiving-stats_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="cran-archiving-stats_files/figure-html/plot-ecdf-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>ECDF of the time packaages get back to CRAN. Days vs % of packages back on CRAN.</figcaption>
 </figure>
 </div>
 </div>
@@ -219,9 +220,10 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="cumulative-number-of-archived-packages-over-the-years">Cumulative number of archived packages over the years</h3>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="cran-archiving-stats_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="cran-archiving-stats_files/figure-html/plot-cumulative-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Packages situation in CRAN altered. Each line represents an action by the CRAN team. On the left the raw counts of cumulative , on the right the same in logarithmic scale.</figcaption>
 </figure>
 </div>
 </div>
@@ -231,9 +233,10 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="days-to-return-versus-date-when-archived">Days to return versus date when archived</h3>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="cran-archiving-stats_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="cran-archiving-stats_files/figure-html/plot-events-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Packages being archived and returning to CRAN. The points are packages, when they were archived from CRAN vs when they returned. The gray dashed line is the event horizon.</figcaption>
 </figure>
 </div>
 </div>
@@ -243,9 +246,10 @@ div.csl-indent {
 <h3 class="anchored" data-anchor-id="distribution-of-number-of-days-for-packages-to-return-to-cran">Distribution of number of days for packages to return to CRAN</h3>
 <div class="cell">
 <div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="cran-archiving-stats_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="cran-archiving-stats_files/figure-html/plot-distribution-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption><strong>Histogram of packages by the time they are off CRAN</strong>. Each bar represents a week. Most packages are less than a month off CRAN.</figcaption>
 </figure>
 </div>
 </div>
