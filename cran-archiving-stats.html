@@ -188,7 +188,7 @@ div.csl-indent {
 </header>
 
 
-<p>CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on CRAN, we have found that 36% of the archived packages get unarchived at some point <span class="citation" data-cites="revilla_2022">(<a href="#ref-revilla_2022" role="doc-biblioref">Revilla 2022</a>)</span>. The median time for these packages to return to CRAN is ~30 days.</p>
+<p>CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on CRAN, we have found that 36% of the archived packages get unarchived at some point <span class="citation" data-cites="revilla_2022">(<a href="#ref-revilla_2022" role="doc-biblioref">Revilla 2022</a>)</span>. The median time for these packages to return to CRAN is ~33 days.</p>
 <section id="analysis" class="level2">
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
 <section id="summary-of-how-long-it-takes-packages-to-be-unarchived" class="level3">
@@ -210,7 +210,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-ecdf-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>ECDF of the time packaages get back to CRAN. Days vs % of packages back on CRAN.</figcaption>
+<figcaption>Empirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN.</figcaption>
 </figure>
 </div>
 </div>
@@ -223,7 +223,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-cumulative-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Packages situation in CRAN altered. Each line represents an action by the CRAN team. On the left the raw counts of cumulative , on the right the same in logarithmic scale.</figcaption>
+<figcaption><strong>Packages actions done by the CRAN Team over time</strong>. The CRAN Team may take different actions for packages currently on e.g.&nbsp;archived (solid red), orphaned (dotted yellow), removed (dashed green), renamed (dashed blue), and unarchived (dotted purple). Presented is the cumulative number of such events over time on the linear (left) and the logarithmic (right) scale.</figcaption>
 </figure>
 </div>
 </div>
@@ -236,7 +236,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-events-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Packages being archived and returning to CRAN. The points are packages, when they were archived from CRAN vs when they returned. The gray dashed line is the event horizon.</figcaption>
+<figcaption><strong>Packages being archived and returning to CRAN.</strong> Each data point represents when a CRAN package was archived (horizontal axis) and when it was unarchived (vertical axis). If more than one package was archive and unarchived on the same dates, the corresponding data point is presented as a larger disk. The gray dashed line is the event horizon.</figcaption>
 </figure>
 </div>
 </div>
@@ -249,7 +249,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-distribution-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Histogram of packages by the time they are off CRAN</strong>. Each bar represents a week. Most packages are less than a month off CRAN.</figcaption>
+<figcaption><strong>Histogram of how long packages remain archived on CRAN</strong>. Each bar represents a week. Most packages return to CRAN within a month.</figcaption>
 </figure>
 </div>
 </div>
