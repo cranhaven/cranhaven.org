@@ -34,7 +34,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.R_LIBS_USER }}
-
+          key: ${{ runner.os }}-r-packages
+          
       - name: Session information
         run: |
           quarto --version
@@ -46,4 +47,3 @@ jobs:
           target: gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
