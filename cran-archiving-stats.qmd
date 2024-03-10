@@ -199,7 +199,7 @@ pw |>
 
 ### Cumulative number of archived packages over the years
 
-```{r}
+```{r plot-cumulative}
 #| fig-cap: "Packages situation in CRAN altered. Each line represents an action by the CRAN team. On the left the raw counts of cumulative , on the right the same in logarithmic scale."
 library("patchwork")
 p <- full_history |> 
