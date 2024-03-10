@@ -33,7 +33,9 @@ jobs:
           
       - name: Install R dependencies
         run: |
-          install.packages(c("ggplot2", "reactable", "patchwork", "dplyr", "tidyr", "knitr"))
+          pkgs <- c("ggplot2", "reactable", "patchwork", "dplyr", "tidyr", "knitr")
+          pkgs <- pkgs[!sapply(pkgs, FUN = requireNamespace)]
+          install.packages(pkgs)
         shell: Rscript {0}
 
       - name: Session information
