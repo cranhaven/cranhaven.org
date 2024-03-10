@@ -35,7 +35,7 @@ don't know how to solve, you can search for a solution in the
 [r-package-devel mailing list] and ask there for help with the package
 development.
 
-```{r}
+```{r dashboard}
 library("dplyr")
 url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
 con <- url(url)
@@ -93,12 +93,16 @@ history <- rbind(comments_df, history_df) |>
          !is.na(date),
          !is.na(action)) 
 
-
 # Show only recent packages
 history |> 
   filter(date > (Sys.Date() - max_days)) |>
   reactable(
     columns = list(
+      package = colDef(cell = function(value) {
+        # Render as a link
+        url <- sprintf("https://cran.r-project.org/package=%s", value)
+        htmltools::tags$a(href = url, target = "_blank", as.character(value))
+      }),
       action = colDef(style = function(value) {
         colours <- list("unarchived" = "green")
         if (value %in% names(colours)) {
