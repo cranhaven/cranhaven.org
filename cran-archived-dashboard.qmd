@@ -32,17 +32,11 @@ fixing the issues pointed on the initial email, as well as any other
 new issue that might show up.  Check the package before sending it and
 explain to the volunteers how you fixed it.  If you have problems you
 don't know how to solve, you can search for a solution in the
-r-package-devel mailing list and ask there for help with the package
+[r-package-devel mailing list] and ask there for help with the package
 development.
 
 ```{r}
 library("dplyr")
-logic2string <- function(x){
-  y <- NA
-  y[x] <- "yes"
-  y[!x] <- "no"
-  y
-}
 url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
 con <- url(url)
 file <- read.dcf(con) |> 
@@ -52,7 +46,7 @@ file <- read.dcf(con) |>
 comments_l <- lapply(file$`X-CRAN-Comment`, function(x) {
   unlist(strsplit(x, "[\n]+"), FALSE, FALSE)
 })
-comments_c <- unlist(comments_l)
+comments_c <- unlist(comments_l, FALSE, FALSE)
 df <- data.frame(package = rep(file$Package, lengths(comments_l)),
            comment = comments_c)
 regex_date <- "([0-9]{4}-[0-9]{2}-[0-9]{2})"
@@ -120,3 +114,4 @@ history |>
 
 [CRAN Repository Policy]: https://cran.r-project.org/web/packages/policies.html
 [PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
+[r-package-devel mailing list]: https://stat.ethz.ch/mailman/listinfo/r-package-devel
