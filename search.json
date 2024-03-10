@@ -46,14 +46,14 @@
     "href": "cran-archived-dashboard.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "",
-    "text": "CRAN packages are often archived and equally often after being taken off CRAN they can be brought up to CRAN.\nThis dashboard updates with the latest {r} max_days days of CRAN archived or unarchived packages from PACKAGES.in the CRAN Team uses to document this process.\nTo avoid being archived, make sure to fix any package issues in time. If you don’t think you can reach the deadline you got, you might be able to convince the CRAN maintainers to extend the deadline. It is also useful to review CRAN Repository Policy once in a while to stay up to date with the CRAN requirements.\nIf your package has already been archived, you can get back to CRAN by fixing the issues pointed on the initial email, as well as any other new issue that might show up. Check the package before sending it and explain to the volunteers how you fixed it. If you have problems you don’t know how to solve, you can search for a solution in the r-package-devel mailing list and ask there for help with the package development."
+    "text": "CRAN packages are often archived and equally often after being taken off CRAN they can be brought up to CRAN.\nThis dashboard updates with the latest 35 days of CRAN archived or unarchived packages from PACKAGES.in the CRAN Team uses to document this process.\nTo avoid being archived, make sure to fix any package issues in time. If you don’t think you can reach the deadline you got, you might be able to convince the CRAN maintainers to extend the deadline. It is also useful to review CRAN Repository Policy once in a while to stay up to date with the CRAN requirements.\nIf your package has already been archived, you can get back to CRAN by fixing the issues pointed on the initial email, as well as any other new issue that might show up. Check the package before sending it and explain to the volunteers how you fixed it. If you have problems you don’t know how to solve, you can search for a solution in the r-package-devel mailing list and ask there for help with the package development."
   },
   {
     "objectID": "cran-archiving-stats.html",
     "href": "cran-archiving-stats.html",
     "title": "Study: Many Archived Packages Return to CRAN",
     "section": "",
-    "text": "CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources on CRAN1, we have found that 36% of the archived packages get unarchived at some point (Revilla 2022). The median time for these packages to return to CRAN is ~30 days."
+    "text": "CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources1 on CRAN, we have found that 36% of the archived packages get unarchived at some point (Revilla 2022). The median time for these packages to return to CRAN is ~30 days."
   },
   {
     "objectID": "cran-archiving-stats.html#analysis",
