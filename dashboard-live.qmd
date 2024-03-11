@@ -93,15 +93,37 @@ history <- rbind(comments_df, history_df) |>
          !is.na(date),
          !is.na(action)) 
 
-# Show only recent packages
-history |> 
-  filter(date > (Sys.Date() - max_days)) |>
-  filter(action == "archived") |>
-  select(-action) |>
-  rename("archived on" = date) |>
+history <- history |>
   mutate(comment = sub("Archived on [[:digit:]-]+[[:blank:]]+(|(as)|[[:blank:]]+)", "", comment)) |>
   mutate(comment = sub("[.]$", "", comment)) |>
-  rename("reason" = comment) |>
+  rename("reason" = comment)
+
+
+## Focus on "recently" archived packages
+history2 <- history |> 
+  filter(date > (Sys.Date() - max_days))
+
+## Drop packages unarchived since
+unarchived <- c()
+for (pkg in unique(history2$package)) {
+  events <- history2 |>
+    filter(package == pkg) |>
+    arrange(desc(date))
+  if (head(events, 1)$action == "unarchived") {
+    unarchived <- c(unarchived, pkg)
+  }
+}
+history2 <- history2 |>
+  filter(!package %in% unarchived)
+
+## Drop 'action' column and rename 'date' column
+history2 <- history2 |>
+  filter(action == "archived") |>
+  dplyr::select(-action) |>
+  rename("archived on" = date)
+
+# Show only recent packages
+history2 |> 
   reactable(
     columns = list(
       package = colDef(cell = function(value) {
