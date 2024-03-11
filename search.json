@@ -1,12 +1,5 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site"
-  },
-  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "CRANhaven",
@@ -68,5 +61,12 @@
     "title": "Study: Many Archived Packages Return to CRAN",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nData sources used are tools:::CRAN_current_db(), tools:::CRAN_archive_db(), and PACKAGES.in.↩︎"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
   }
 ]
