@@ -108,6 +108,24 @@ history |>
         # Render as a link
         url <- sprintf("https://cran.r-project.org/package=%s", value)
         htmltools::tags$a(href = url, target = "_blank", as.character(value))
+      }),
+      reason = colDef(cell = function(value) {
+        if (!grepl("requires archived package", value)) return(value)
+        tags <- list()
+        pattern <- "(.*)'([^']+)'(.*)"
+        while (grepl(pattern, value)) {
+          prefix <- gsub(pattern, "\\1", value)
+          prefix <- htmltools::tags$text(prefix)
+          pkg <- gsub(pattern, "\\2", value)
+          url <- sprintf("https://cran.r-project.org/package=%s", pkg)
+          link <- htmltools::tags$a(href = url, target = "_blank", pkg)
+          tags <- c(tags, list(prefix, link))
+          value <- gsub(pattern, "\\3", value)
+        }
+        if (nchar(value) > 0) {
+          tags <- c(tags, list(htmltools::tags$text(value)))
+        }
+        tags
       })
     ),
     defaultSorted = list("archived on" = "desc", "package" = "asc"),
