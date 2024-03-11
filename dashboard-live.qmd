@@ -98,6 +98,10 @@ history |>
   filter(date > (Sys.Date() - max_days)) |>
   filter(action == "archived") |>
   select(-action) |>
+  rename("archived on" = date) |>
+  mutate(comment = sub("Archived on [[:digit:]-]+[[:blank:]]+(|(as)|[[:blank:]]+)", "", comment)) |>
+  mutate(comment = sub("[.]$", "", comment)) |>
+  rename("reason" = comment) |>
   reactable(
     columns = list(
       package = colDef(cell = function(value) {
@@ -106,7 +110,7 @@ history |>
         htmltools::tags$a(href = url, target = "_blank", as.character(value))
       })
     ),
-    defaultSorted = list("date" = "desc", "package" = "asc"),
+    defaultSorted = list("archived on" = "desc", "package" = "asc"),
     filterable = TRUE,
     defaultPageSize = 50)
 ```
