@@ -116,10 +116,17 @@ for (pkg in unique(history2$package)) {
 history2 <- history2 |>
   filter(!package %in% unarchived)
 
-## Drop 'action' column and rename 'date' column
+## Drop 'action' column
 history2 <- history2 |>
   filter(action == "archived") |>
-  dplyr::select(-action) |>
+  dplyr::select(-action)
+
+## Add 'check_url'
+history2 <- history2 |>
+  mutate("check results" = sprintf("https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, package))
+
+## Rename 'date' column
+history2 <- history2 |>
   rename("archived on" = date)
 
 # Show only recent packages
@@ -131,19 +138,34 @@ history2 |>
         url <- sprintf("https://cran.r-project.org/package=%s", value)
         htmltools::tags$a(href = url, target = "_blank", as.character(value))
       }),
+
+      "check results" = colDef(cell = function(value) {
+        htmltools::tags$a(href = value, target = "_blank", "checks")
+      }),
+
       reason = colDef(cell = function(value) {
-        if (!grepl("requires archived package", value)) return(value)
         tags <- list()
-        pattern <- "(.*)'([^']+)'(.*)"
-        while (grepl(pattern, value)) {
-          prefix <- gsub(pattern, "\\1", value)
-          prefix <- htmltools::tags$text(prefix)
-          pkg <- gsub(pattern, "\\2", value)
-          url <- sprintf("https://cran.r-project.org/package=%s", pkg)
-          link <- htmltools::tags$a(href = url, target = "_blank", pkg)
-          tags <- c(tags, list(prefix, link))
-          value <- gsub(pattern, "\\3", value)
+        
+        if (grepl("requires archived package", value)) {
+          pattern <- "(.*)'([^']+)'(.*)"
+          while (grepl(pattern, value)) {
+            prefix <- gsub(pattern, "\\1", value)
+            prefix <- htmltools::tags$text(prefix)
+            pkg <- gsub(pattern, "\\2", value)
+            url <- sprintf("https://cran.r-project.org/package=%s", pkg)
+            link <- htmltools::tags$a(href = url, target = "_blank", pkg)
+            tags <- c(tags, list(prefix, link))
+            value <- gsub(pattern, "\\3", value)
+          }
         }
+
+        pattern <- "foo(check problems|issues)( were not corrected.*)"
+        if (grepl(pattern, value)) {
+          ## FIXME: How to find date and pkg from within this reactive function?
+          #url <- sprintf("https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, pkg)
+          #link <- htmltools::tags$a(href = url, target = "_blank", pkg)
+        }
+
         if (nchar(value) > 0) {
           tags <- c(tags, list(htmltools::tags$text(value)))
         }
