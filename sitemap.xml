@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.cranhaven.org/about.html</loc>
-    <lastmod>2024-03-12T00:31:13.616Z</lastmod>
-  </url>
-  <url>
     <loc>https://www.cranhaven.org/index.html</loc>
-    <lastmod>2024-03-12T00:31:13.620Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.cranhaven.org/dashboard-live.html</loc>
-    <lastmod>2024-03-12T00:31:13.620Z</lastmod>
+    <lastmod>2024-03-12T01:38:34.425Z</lastmod>
   </url>
   <url>
     <loc>https://www.cranhaven.org/cran-archiving-stats.html</loc>
-    <lastmod>2024-03-12T00:31:13.620Z</lastmod>
+    <lastmod>2024-03-12T01:38:34.425Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.cranhaven.org/dashboard-live.html</loc>
+    <lastmod>2024-03-12T01:38:34.425Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.cranhaven.org/about.html</loc>
+    <lastmod>2024-03-12T01:38:34.421Z</lastmod>
   </url>
 </urlset>
