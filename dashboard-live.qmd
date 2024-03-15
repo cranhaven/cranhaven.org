@@ -56,9 +56,10 @@ comments_df <- cbind(df,
                       proto = data.frame(date = Sys.Date()[0])),
            strcapture(pattern = regex_action, x = df$comment,
                       proto = data.frame(action = character()))
-           ) |> 
+           ) |>
   filter(!is.na(comment)) |> 
   mutate(action = tolower(action))
+  
 # Check that count(comments_df, !is.na(date), !is.na(action), sort = TRUE) makes sense
 # Handle rolled and no keyword used
 comments_df$action[!is.na(comments_df$date) & is.na(comments_df$action)] <- "archived"
@@ -72,8 +73,8 @@ history_l <- lapply(file$`X-CRAN-History`, function(x) {
 history_c <- unlist(history_l)
 
 history_df <- data.frame(package = rep(file$Package, lengths(history_l)),
-                    comment = history_c) |> 
-  filter(!is.na(comment))
+                    comment = history_c)
+history_df <- history_df |> filter(!is.na(comment))
 
 history_df <- cbind(history_df,
                     strcapture(pattern = regex_date, x = history_df$comment, 
@@ -83,7 +84,7 @@ history_df <- cbind(history_df,
            ) |> 
   mutate(action = tolower(action))
 history_df$action[grep("Back on CRAN", history_df$comment, ignore.case = TRUE)] <- "unarchived"
-library("reactable")
+
 history <- rbind(comments_df, history_df) |> 
   mutate(action = gsub(pattern = "e$", replacement = "ed", action)) |> 
   arrange(package) |>
@@ -123,13 +124,14 @@ history2 <- history2 |>
 
 ## Add 'check_url'
 history2 <- history2 |>
-  mutate("check results" = sprintf("https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, package))
+  mutate("links" = paste(sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, package), sprintf("source=https://github.com/cran/%s", package), sep = ", "))
 
 ## Rename 'date' column
 history2 <- history2 |>
   rename("archived on" = date)
 
 # Show only recent packages
+library("reactable")
 history2 |> 
   reactable(
     columns = list(
@@ -139,8 +141,19 @@ history2 |>
         htmltools::tags$a(href = url, target = "_blank", as.character(value))
       }),
 
-      "check results" = colDef(cell = function(value) {
-        htmltools::tags$a(href = value, target = "_blank", "checks")
+      links = colDef(cell = function(value) {
+        links <- strsplit(value, split = ",", fixed = TRUE)[[1]]
+        links <- gsub("(^[[:blank:]]+|[[:blank:]]+$)", "", links)
+        tags <- list()
+        for (kk in seq_along(links)) {
+          if (kk > 1) tags <- c(tags, list(htmltools::tags$text(", ")))
+
+          link <- links[[kk]]
+          label <- sub("=.*", "", link)
+          url <- sub("[^=]*=", "", link)
+          tags <- c(tags, list(htmltools::tags$a(href = url, target = "_blank", label)))
+        }
+        tags
       }),
 
       reason = colDef(cell = function(value) {
