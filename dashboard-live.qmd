@@ -44,10 +44,10 @@ file <- read.dcf(con) |>
 
 # Extract multiline comments
 comments_l <- lapply(file$`X-CRAN-Comment`, function(x) {
-  unlist(strsplit(x, "[\n]+"), FALSE, FALSE)
+  unlist(strsplit(x, "[\n]+"), recursive = FALSE, use.names = FALSE)
 })
-comments_c <- unlist(comments_l, FALSE, FALSE)
-df <- data.frame(package = rep(file$Package, lengths(comments_l)),
+comments_c <- unlist(comments_l, recursive = FALSE, use.names = FALSE)
+df <- data.frame(package = rep(file$Package, times = lengths(comments_l)),
            comment = comments_c)
 regex_date <- "([0-9]{4}-[0-9]{2}-[0-9]{2})"
 regex_action <- "([Uu]narchived?|[Aa]rchived?|[Rr]enamed?|[Oo]rphaned?|[Rr]eplaced?|[Rr]emoved?)"
@@ -68,7 +68,7 @@ comments_df$action[!is.na(comments_df$date) & is.na(comments_df$action)] <- "arc
 # filter(comments_df, is.na(action) & is.na(date)) |> View("b")
 # Handle CRAN-history
 history_l <- lapply(file$`X-CRAN-History`, function(x) {
-  unlist(strsplit(x, "[\n]+"), FALSE, FALSE)
+  unlist(strsplit(x, "[\n]+"), recursive = FALSE, use.names = FALSE)
 })
 history_c <- unlist(history_l)
 
