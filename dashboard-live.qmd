@@ -37,102 +37,50 @@ development.
 
 ```{r dashboard}
 library("dplyr")
-url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
-con <- url(url)
-file <- read.dcf(con) |> 
-  as.data.frame()
 
-# Extract multiline comments
-comments_l <- lapply(file$`X-CRAN-Comment`, function(x) {
-  unlist(strsplit(x, "[\n]+"), recursive = FALSE, use.names = FALSE)
-})
-comments_c <- unlist(comments_l, recursive = FALSE, use.names = FALSE)
-df <- data.frame(package = rep(file$Package, times = lengths(comments_l)),
-           comment = comments_c)
-regex_date <- "([0-9]{4}-[0-9]{2}-[0-9]{2})"
-regex_action <- "([Uu]narchived?|[Aa]rchived?|[Rr]enamed?|[Oo]rphaned?|[Rr]eplaced?|[Rr]emoved?)"
-comments_df <- cbind(df, 
-           strcapture(pattern = regex_date, x = df$comment, 
-                      proto = data.frame(date = Sys.Date()[0])),
-           strcapture(pattern = regex_action, x = df$comment,
-                      proto = data.frame(action = character()))
-           ) |>
-  filter(!is.na(comment)) |> 
-  mutate(action = tolower(action))
-  
-# Check that count(comments_df, !is.na(date), !is.na(action), sort = TRUE) makes sense
-# Handle rolled and no keyword used
-comments_df$action[!is.na(comments_df$date) & is.na(comments_df$action)] <- "archived"
-
-# filter(comments_df, !is.na(action) & is.na(date)) |> View("a")
-# filter(comments_df, is.na(action) & is.na(date)) |> View("b")
-# Handle CRAN-history
-history_l <- lapply(file$`X-CRAN-History`, function(x) {
-  unlist(strsplit(x, "[\n]+"), recursive = FALSE, use.names = FALSE)
-})
-history_c <- unlist(history_l)
-
-history_df <- data.frame(package = rep(file$Package, lengths(history_l)),
-                    comment = history_c)
-history_df <- history_df |> filter(!is.na(comment))
-
-history_df <- cbind(history_df,
-                    strcapture(pattern = regex_date, x = history_df$comment, 
-                               proto = data.frame(date = Sys.Date()[0])),
-                    strcapture(pattern = regex_action, x = history_df$comment,
-                               proto = data.frame(action = character()))
-           ) |> 
-  mutate(action = tolower(action))
-history_df$action[grep("Back on CRAN", history_df$comment, ignore.case = TRUE)] <- "unarchived"
-
-history <- rbind(comments_df, history_df) |> 
-  mutate(action = gsub(pattern = "e$", replacement = "ed", action)) |> 
-  arrange(package) |>
-  relocate(date) |>
-  relocate(comment, .after = last_col()) |>
-  filter(action %in% c("archived", "unarchived"),
-         !is.na(date),
-         !is.na(action)) 
-
-history <- history |>
-  mutate(comment = sub("Archived on [[:digit:]-]+[[:blank:]]+(|(as)|[[:blank:]]+)", "", comment)) |>
-  mutate(comment = sub("[.]$", "", comment)) |>
-  rename("reason" = comment)
-
-
-## Focus on "recently" archived packages
-history2 <- history |> 
-  filter(date > (Sys.Date() - max_days))
-
-## Drop packages unarchived since
-unarchived <- c()
-for (pkg in unique(history2$package)) {
-  events <- history2 |>
-    filter(package == pkg) |>
-    arrange(desc(date))
-  if (head(events, 1)$action == "unarchived") {
-    unarchived <- c(unarchived, pkg)
+cranhaven_packages <- local({
+  data <- NULL
+  function(url = "https://raw.githubusercontent.com/cranhaven/cranhaven.r-universe.dev/main/packages.json") {
+    if (!is.null(data)) return(data)
+    db <- jsonlite::read_json(url)
+    ## Patch missing fields
+    names <- unique(unlist(lapply(db, FUN = names)))
+    db <- lapply(db, FUN = function(x, names) {
+      missing <- setdiff(names, names(x))
+      for (name in missing) {
+        x[[name]] <- NA_character_
+      }
+      as.data.frame(x)
+    }, names = names)
+    stopifnot(lengths(db) == length(db[[1]]))
+    db <- do.call(rbind, db)
+    db$archived_on <- as.Date(db$archived_on)
+    db$x_cran_comment_date <- as.Date(db$x_cran_comment_date)
+    data <<- db
+    data
   }
-}
-history2 <- history2 |>
-  filter(!package %in% unarchived)
+}) ## cranhaven_packages()
 
-## Drop 'action' column
-history2 <- history2 |>
-  filter(action == "archived") |>
-  dplyr::select(-action)
-
-## Add 'check_url'
-history2 <- history2 |>
-  mutate("links" = paste(sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, package), sprintf("source=https://github.com/cran/%s", package), sep = ", "))
+history <- cranhaven_packages()
+history <- mutate(history, links = paste(
+  sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", archived_on), archived_on, package),
+  sprintf("source=https://github.com/cran/%s", package),
+  sep = ", "
+))
 
 ## Rename 'date' column
-history2 <- history2 |>
-  rename("archived on" = date)
+history <- rename(history,
+  "date"   = archived_on,
+  "event"  = x_cran_comment_event,
+  "reason" = x_cran_comment_reason
+)
+
+history <- history[, c("date", "package", "event", "reason", "links")]
+
 
 # Show only recent packages
 library("reactable")
-history2 |> 
+history |> 
   reactable(
     columns = list(
       package = colDef(cell = function(value) {
@@ -185,7 +133,7 @@ history2 |>
         tags
       })
     ),
-    defaultSorted = list("archived on" = "desc", "package" = "asc"),
+    defaultSorted = list("date" = "desc", "package" = "asc"),
     filterable = TRUE,
     defaultPageSize = 50)
 ```
