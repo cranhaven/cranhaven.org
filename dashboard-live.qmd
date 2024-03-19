@@ -110,6 +110,10 @@ history <- rename(history,
 idxs <- which(!is.na(history$cran_incoming))
 history$event[idxs] <- paste(history$event[idxs], "resubmitted", sep = ", ")
 
+idxs <- which(!is.na(history$x_cran_history))
+history$reason[idxs] <- paste(history$reason[idxs], sprintf("Previously: %s", gsub("\n", " ", history$x_cran_history[idxs])), sep = ". ")
+history$reason <- gsub("[.]+", ".", history$reason)
+
 history <- history[, c("date", "package", "event", "reason", "links")]
 
 # Show only recent packages
