@@ -130,6 +130,26 @@ history$reason[-idxs] <- paste0(history$reason[-idxs], ".")
 history$reason <- gsub("[.]+", ".", history$reason)
 history$reason <- captalize(history$reason)
 
+## SPECIAL CASE: Package has just returned to CRAN?
+idxs <- which(is.na(history$event))
+if (length(idxs) > 0) {
+  for (idx in idxs) {
+    pkg <- history$package[idx]
+    url <- sprintf("https://cran.r-project.org/package=%s", pkg)
+    bfr <- readLines(url, warn = FALSE)
+    has_returned <- !any(grepl("was removed from the CRAN repository", bfr))
+    if (has_returned) {
+      history$package[idx] <- NA_character_
+    } else {
+      history$event[idx] <- "?"
+      history$reason[idx] <- "CRANhaven cannot currently infer status."
+    }
+  }
+  history <- subset(history, !is.na(package))
+}
+
+
+
 history$links <- with(history, paste(
   sprintf('<a href="https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html">checks</a>', sub("-.*", "", date), date, package),
   sprintf('<a href="https://github.com/cran/%s">source</a>', package),
