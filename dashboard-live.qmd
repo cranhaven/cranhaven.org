@@ -5,6 +5,10 @@ execute:
   freeze: false
 ---
 
+<style>
+tr { vertical-align: top; }
+</style>
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -52,6 +56,7 @@ cranhaven_packages <- local({
   function(url = "https://raw.githubusercontent.com/cranhaven/cranhaven.r-universe.dev/main/packages.json") {
     if (!is.null(data)) return(data)
     db <- jsonlite::read_json(url)
+    
     ## Patch missing fields
     names <- unique(unlist(lapply(db, FUN = names)))
     db <- lapply(db, FUN = function(x, names) {
@@ -62,9 +67,13 @@ cranhaven_packages <- local({
       as.data.frame(x)
     }, names = names)
     stopifnot(lengths(db) == length(db[[1]]))
+    
     db <- do.call(rbind, db)
+
+    ## Coerce to dates
     db$archived_on <- as.Date(db$archived_on)
     db$x_cran_comment_date <- as.Date(db$x_cran_comment_date)
+    
     data <<- db
     data
   }
@@ -87,18 +96,20 @@ cran_incoming <- local({
   }
 })
 
+captalize <- function(x) {
+  vapply(x, FUN.VALUE = NA_character_, FUN = function(s) {
+    if (is.na(s) || nchar(s) == 0) return(s)
+    first <- substr(s, start = 1L, stop = 1L)
+    tail <- substr(s, start = 2L, stop = nchar(s))
+    paste0(toupper(first), tail)
+  })
+}
+
 history <- cranhaven_packages()
 incoming <- cran_incoming()
 incoming <- incoming[, c("package", "folder")]
 colnames(incoming)[2] <- "cran_incoming"
 history <- merge(history, incoming, by = "package", all.x = TRUE)
-
-history$links <- with(history, paste(
-  sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", archived_on), archived_on, package),
-  sprintf("source=https://github.com/cran/%s", package),
-  sep = ", "
-))
-
 
 ## Rename columns
 history <- rename(history,
@@ -108,91 +119,29 @@ history <- rename(history,
 )
 
 idxs <- which(!is.na(history$cran_incoming))
-history$event[idxs] <- paste(history$event[idxs], "resubmitted", sep = ", ")
+history$event[idxs] <- paste(history$event[idxs], '<a href="https://r-hub.github.io/cransays/articles/dashboard.html">resubmitted</a>', sep = ", ")
 
 idxs <- which(!is.na(history$x_cran_history))
-history$reason[idxs] <- paste(history$reason[idxs], sprintf("Previously: %s", gsub("\n", " ", history$x_cran_history[idxs])), sep = ". ")
+history$reason[idxs] <- paste(history$reason[idxs], sprintf("<br><small><em>Previously</em>: %s</small>", gsub("\n", " ", history$x_cran_history[idxs])), sep = ". ")
+history$reason[-idxs] <- paste0(history$reason[-idxs], ".")
 history$reason <- gsub("[.]+", ".", history$reason)
+history$reason <- captalize(history$reason)
+
+history$links <- with(history, paste(
+  sprintf('<a href="https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html">checks</a>', sub("-.*", "", date), date, package),
+  sprintf('<a href="https://github.com/cran/%s">source</a>', package),
+  sep = ", "
+))
+
+history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
 
 history <- history[, c("date", "package", "event", "reason", "links")]
 
 # Show only recent packages
-library("reactable")
-history |> 
-  reactable(
-    columns = list(
-      package = colDef(cell = function(value) {
-        # Render as a link
-        url <- sprintf("https://cran.r-project.org/package=%s", value)
-        htmltools::tags$a(href = url, target = "_blank", as.character(value))
-      }),
-
-      event = colDef(cell = function(value) {
-        values <- strsplit(value, split = ",", fixed = TRUE)[[1]]
-        values <- gsub("(^[ ]+|[ ]+$)", "", values)
-        if (!"resubmitted" %in% values) return(value)
-        tags <- list()
-        for (kk in seq_along(values)) {
-          if (kk > 1) tags <- c(tags, list(htmltools::tags$text(", ")))
-          value <- values[kk]
-          if (value == "resubmitted") {
-            tag <- htmltools::tags$a(href = "https://r-hub.github.io/cransays/articles/dashboard.html", target = "_blank", "resubmitted")
-          } else {
-            tag <- htmltools::tags$text(value)
-          }
-          tags <- c(tags, list(tag))
-        }
-        tags
-      }),
-
-      links = colDef(cell = function(value) {
-        links <- strsplit(value, split = ",", fixed = TRUE)[[1]]
-        links <- gsub("(^[[:blank:]]+|[[:blank:]]+$)", "", links)
-        tags <- list()
-        for (kk in seq_along(links)) {
-          if (kk > 1) tags <- c(tags, list(htmltools::tags$text(", ")))
-
-          link <- links[[kk]]
-          label <- sub("=.*", "", link)
-          url <- sub("[^=]*=", "", link)
-          tags <- c(tags, list(htmltools::tags$a(href = url, target = "_blank", label)))
-        }
-        tags
-      }),
-
-      reason = colDef(cell = function(value) {
-        tags <- list()
-        
-        if (grepl("requires archived package", value)) {
-          pattern <- "(.*)'([^']+)'(.*)"
-          while (grepl(pattern, value)) {
-            prefix <- gsub(pattern, "\\1", value)
-            prefix <- htmltools::tags$text(prefix)
-            pkg <- gsub(pattern, "\\2", value)
-            url <- sprintf("https://cran.r-project.org/package=%s", pkg)
-            link <- htmltools::tags$a(href = url, target = "_blank", pkg)
-            tags <- c(tags, list(prefix, link))
-            value <- gsub(pattern, "\\3", value)
-          }
-        }
-
-        pattern <- "foo(check problems|issues)( were not corrected.*)"
-        if (grepl(pattern, value)) {
-          ## FIXME: How to find date and pkg from within this reactive function?
-          #url <- sprintf("https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", date), date, pkg)
-          #link <- htmltools::tags$a(href = url, target = "_blank", pkg)
-        }
-
-        if (nchar(value) > 0) {
-          tags <- c(tags, list(htmltools::tags$text(value)))
-        }
-        tags
-      })
-    ),
-    defaultSorted = list("date" = "desc", "package" = "asc"),
-    filterable = TRUE,
-    defaultPageSize = 50)
+library("DT")
+datatable(history, rownames = FALSE, escape = FALSE, options = list(pageLength = 50))
 ```
+
 
 [CRAN archive area]: https://cran.r-project.org/src/contrib/Archive/
 [CRAN mirror on R-universe]: https://cran.r-universe.dev/builds
