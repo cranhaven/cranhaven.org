@@ -67,7 +67,7 @@
     "href": "dashboard-live.html#footnotes",
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "Footnotes",
-    "text": "Footnotes\n\n\nWhen a package is archived, the archive version are still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is are rare event, the removed package version is completely removed from CRAN, and no longer available for download.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
+    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is a rare event, the removed package version is completely removed from CRAN, and no longer available for download. Earlier versions might be available in the CRAN archive area.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
   },
   {
     "objectID": "about.html",
