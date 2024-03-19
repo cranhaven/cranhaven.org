@@ -60,7 +60,14 @@
     "href": "dashboard-live.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "",
-    "text": "CRAN packages are often archived and equally often after being taken off CRAN they can be brought up to CRAN.\nThis dashboard updates with the latest 35 days of CRAN archived or unarchived packages from PACKAGES.in the CRAN Team uses to document this process.\nTo avoid being archived, make sure to fix any package issues in time. If you don’t think you can reach the deadline you got, you might be able to convince the CRAN maintainers to extend the deadline. It is also useful to review CRAN Repository Policy once in a while to stay up to date with the CRAN requirements.\nIf your package has already been archived, you can get back to CRAN by fixing the issues pointed on the initial email, as well as any other new issue that might show up. Check the package before sending it and explain to the volunteers how you fixed it. If you have problems you don’t know how to solve, you can search for a solution in the r-package-devel mailing list and ask there for help with the package development."
+    "text": "The below table lists all R packages that are no longer on CRAN, because they have been archived1 on, or removed2 from, CRAN during the last 35 days. The table shows date when a package was dropped by CRAN and their reason3 for it. If a package has since been resubmitted and is waiting in the CRAN incoming queue, it is marked as “resubmitted” (in the ‘event’ column). Links to the most recent CRAN checks and the source code are also provided. Packages that are not unarchived on CRAN within 35 days, are removed also from CRANhaven4."
+  },
+  {
+    "objectID": "dashboard-live.html#footnotes",
+    "href": "dashboard-live.html#footnotes",
+    "title": "Dashboard: Recently Archived CRAN Packages",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWhen a package is archived, the archive version are still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is are rare event, the removed package version is completely removed from CRAN, and no longer available for download.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
   },
   {
     "objectID": "about.html",
