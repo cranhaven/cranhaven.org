@@ -3,8 +3,8 @@ on:
   push:
     branches: main
   schedule:
-    ## Run once an hour
-    - cron:  '0 * * * *'
+    ## Run once every 10 minutes
+    - cron:  '*/10 * * * *'
 
 name: Quarto Publish
 
