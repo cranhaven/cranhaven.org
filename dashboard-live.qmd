@@ -89,24 +89,24 @@ incoming <- incoming[, c("package", "folder")]
 colnames(incoming)[2] <- "cran_incoming"
 history <- merge(history, incoming, by = "package", all.x = TRUE)
 
-links <- with(history, paste(
+history$links <- with(history, paste(
   sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", archived_on), archived_on, package),
   sprintf("source=https://github.com/cran/%s", package),
   sep = ", "
 ))
-links <- ifelse(is.na(history$cran_incoming), links, paste(links, "resubmitted=https://r-hub.github.io/cransays/articles/dashboard.html", sep = ", "))
-history$links <- links
 
 
-## Rename 'date' column
+## Rename columns
 history <- rename(history,
   "date"   = archived_on,
   "event"  = x_cran_comment_event,
   "reason" = x_cran_comment_reason
 )
 
-history <- history[, c("date", "package", "event", "reason", "links")]
+idxs <- which(!is.na(history$cran_incoming))
+history$event[idxs] <- paste(history$event[idxs], "resubmitted", sep = ", ")
 
+history <- history[, c("date", "package", "event", "reason", "links")]
 
 # Show only recent packages
 library("reactable")
@@ -117,6 +117,24 @@ history |>
         # Render as a link
         url <- sprintf("https://cran.r-project.org/package=%s", value)
         htmltools::tags$a(href = url, target = "_blank", as.character(value))
+      }),
+
+      event = colDef(cell = function(value) {
+        values <- strsplit(value, split = ",", fixed = TRUE)[[1]]
+        values <- gsub("(^[ ]+|[ ]+$)", "", values)
+        if (!"resubmitted" %in% values) return(value)
+        tags <- list()
+        for (kk in seq_along(values)) {
+          if (kk > 1) tags <- c(tags, list(htmltools::tags$text(", ")))
+          value <- values[kk]
+          if (value == "resubmitted") {
+            tag <- htmltools::tags$a(href = "https://r-hub.github.io/cransays/articles/dashboard.html", target = "_blank", "resubmitted")
+          } else {
+            tag <- htmltools::tags$text(value)
+          }
+          tags <- c(tags, list(tag))
+        }
+        tags
       }),
 
       links = colDef(cell = function(value) {
