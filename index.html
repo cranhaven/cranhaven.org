@@ -231,10 +231,10 @@ Warning
 <p>This is work under development! Please do <em>not</em> rely on it for production and do <em>not</em> add CRANhaven to <code>Additional_repositories</code> of your package.</p>
 </div>
 </div>
-<p>The <strong>CRANhaven</strong> R package repository, available on <a href="https://cranhaven.r-universe.dev">R-universe</a>, hosts packages that were recently archived on CRAN<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Those packages can be installed using:</p>
+<p>The <strong>CRANhaven</strong> package repository hosts <a href="dashboard-live.html">R packages that were recently archived on CRAN</a>. Those packages can be installed using:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">c</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>), <span class="st">"https://cranhaven.r-universe.dev"</span>))</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"somepkg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Packages remain on CRANhaven for up to five weeks<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, or until they are unarchived on CRAN.</p>
+<p>Packages remain on CRANhaven<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> for up to five weeks<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, or until they are unarchived on CRAN.</p>
 <section id="motivation" class="level2">
 <h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
 <div>
@@ -272,7 +272,7 @@ Revilla, Lluís. 2022. <span>“Reasons Why Packages Are Archived on <span>CRAN<
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>The “Commit” datestamps seen on <a href="https://cranhaven.r-universe.dev">R-universe</a> show the dates (±1 day) when the packages were archived on CRAN.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>CRANhaven is served via <a href="https://cranhaven.r-universe.dev">R-universe</a>. The “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>The five-week limit is based on our <a href="cran-archiving-stats.html">results</a> showing that the median time for a package to return to CRAN is 30 days.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
