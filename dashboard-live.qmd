@@ -1,5 +1,8 @@
 ---
 title: "Dashboard: Recently Archived CRAN Packages"
+
+execute:
+  freeze: false
 ---
 
 ```{r setup, include = FALSE}

@@ -1,5 +1,8 @@
 ---
 title: "Study: Many Archived Packages Return to CRAN"
+
+execute:
+  freeze: auto
 ---
 
 ```{r setup, include = FALSE}
