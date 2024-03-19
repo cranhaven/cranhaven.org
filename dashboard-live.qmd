@@ -141,7 +141,10 @@ history <- history[, c("date", "package", "event", "reason", "links")]
 
 # Show only recent packages
 library("DT")
-datatable(history, rownames = FALSE, escape = FALSE, options = list(pageLength = 50))
+datatable(history, rownames = FALSE, escape = FALSE, options = list(
+  pageLength = 50,
+  order = list(list(0, "desc"), list(1, "asc"))
+))
 ```
 
 
