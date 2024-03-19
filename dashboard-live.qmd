@@ -41,8 +41,10 @@ development.
 ```{r dashboard}
 library("dplyr")
 
+#' @importFrom jsonlite read_json
 cranhaven_packages <- local({
   data <- NULL
+  
   function(url = "https://raw.githubusercontent.com/cranhaven/cranhaven.r-universe.dev/main/packages.json") {
     if (!is.null(data)) return(data)
     db <- jsonlite::read_json(url)
@@ -64,12 +66,37 @@ cranhaven_packages <- local({
   }
 }) ## cranhaven_packages()
 
+#' @importFrom ciw incoming
+cran_incoming <- local({
+  data <- NULL
+  
+  function() {
+    if (!is.null(data)) return(data)
+    db <- ciw::incoming(folder = c("pretest", "recheck", "inspect", "pending", "waiting", "newbies"), check = FALSE)
+    db <- as.data.frame(db)
+    colnames(db) <- tolower(colnames(db))
+    db$package <- gsub("_.*", "", db$name)
+    db$version <- gsub("(.*_|[.]tar[.]gz)", "", db$name)
+    db <- db[, c("package", "version", "folder", "time")]
+    data <<- db
+    data
+  }
+})
+
 history <- cranhaven_packages()
-history <- mutate(history, links = paste(
+incoming <- cran_incoming()
+incoming <- incoming[, c("package", "folder")]
+colnames(incoming)[2] <- "cran_incoming"
+history <- merge(history, incoming, by = "package", all.x = TRUE)
+
+links <- with(history, paste(
   sprintf("checks=https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html", sub("-.*", "", archived_on), archived_on, package),
   sprintf("source=https://github.com/cran/%s", package),
   sep = ", "
 ))
+links <- ifelse(is.na(history$cran_incoming), links, paste(links, "resubmitted=https://r-hub.github.io/cransays/articles/dashboard.html", sep = ", "))
+history$links <- links
+
 
 ## Rename 'date' column
 history <- rename(history,
