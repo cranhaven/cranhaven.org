@@ -55,7 +55,7 @@ jobs:
         id: changed
         continue-on-error: true
         run: |
-           git checkout -progress --force -B gh-pages refs/remotes/origin/gh-pages
+           git checkout --progress --force -B gh-pages refs/remotes/origin/gh-pages
            for file in $(cd _site/; find . -name "*.html"); do
              diff -w "${file}" "_site/${file}" > /dev/null && exit 0
            done
