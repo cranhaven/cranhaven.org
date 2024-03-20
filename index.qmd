@@ -45,7 +45,7 @@ CRAN. Sometimes the deadline is as short as two weeks. In
 @revilla_2022, it was found that 36% of all archived CRAN package get
 "unarchived" again at some point in the future. Our [results] show
 that the median time for an archived package to reappear on CRAN is
-~30 days.
+around 30 days.
 
 The impact of a CRAN package being archived depends on the
 package, and how widely used it is, and how many packages depend on
