@@ -59,7 +59,7 @@ jobs:
            publish=false
            for file in $(cd _site/; find . -name "*.html"); do
              echo "${file}:"
-             diff -u -w "${file}" "_site/${file}" && publish=true
+             diff -u -w "${file}" "_site/${file}" || publish=true
            done
            git checkout main
            echo "publish=${publish}"
