@@ -53,17 +53,17 @@ jobs:
 
       - name: Did output HTML files change?
         id: changed
-        continue-on-error: true
         run: |
            git fetch origin gh-pages:gh-pages --depth=1
            git checkout gh-pages
            for file in $(cd _site/; find . -name "*.html"); do
-             diff -w "${file}" "_site/${file}" > /dev/null && exit 0
+             diff -w "${file}" "_site/${file}" > /dev/null && echo ::set-output name=publish::true
            done
-           exit 1
+           echo ::set-output name=publish::false
+           git checkout main
 
       - name: Publish
-        if: steps.changed.outcome == 'success'
+        if: steps.changed.outputs.publish == true
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           render: "false"
