@@ -63,14 +63,9 @@ jobs:
            git checkout main
            echo "publish=${publish}"
            echo "publish=${publish}" >> "${GITHUB_OUTPUT}"
-
-      - name: Display output from step 'changed'
-        run: |
-          echo "publish='${{ steps.changed.outputs.publish }}'"
-          echo "outputs='${{ steps.changed.outputs }}'"
-
+           
       - name: Publish
-        if: steps.changed.outputs.publish == true
+        if: ${{ steps.changed.outputs.publish }} == true
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           render: "false"
