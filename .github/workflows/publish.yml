@@ -61,6 +61,7 @@ jobs:
              diff -w "${file}" "_site/${file}" > /dev/null && publish=true
            done
            git checkout main
+           echo "publish=${publish}"
            echo "publish=${publish}" >> "${GITHUB_OUTPUT}"
 
       - name: Publish
