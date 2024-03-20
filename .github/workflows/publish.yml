@@ -56,11 +56,12 @@ jobs:
         run: |
            git fetch origin gh-pages:gh-pages --depth=1
            git checkout gh-pages
+           publish=false
            for file in $(cd _site/; find . -name "*.html"); do
-             diff -w "${file}" "_site/${file}" > /dev/null && echo ::set-output name=publish::true
+             diff -w "${file}" "_site/${file}" > /dev/null && publish=true
            done
-           echo ::set-output name=publish::false
            git checkout main
+           echo "publish=${publish}" >> "${GITHUB_OUTPUT}"
 
       - name: Publish
         if: steps.changed.outputs.publish == true
