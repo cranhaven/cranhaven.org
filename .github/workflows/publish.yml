@@ -58,7 +58,8 @@ jobs:
            git checkout gh-pages
            publish=false
            for file in $(cd _site/; find . -name "*.html"); do
-             diff -w "${file}" "_site/${file}" > /dev/null && publish=true
+             echo "${file}:"
+             diff -u -w "${file}" "_site/${file}" && publish=true
            done
            git checkout main
            echo "publish=${publish}"
