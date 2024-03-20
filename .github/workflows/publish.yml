@@ -65,7 +65,7 @@ jobs:
            echo "publish=${publish}" >> "${GITHUB_OUTPUT}"
            
       - name: Publish
-        if: ${{ steps.changed.outputs.publish }} == true
+        if: ${{ steps.changed.outputs.publish == 'true' }}
         uses: quarto-dev/quarto-actions/publish@v2
         with:
           render: "false"
