@@ -23,12 +23,12 @@ max_days <- 5*7
 
 The below table lists all R packages that are no longer on CRAN,
 because they have been either archived[^1] on or removed[^2] from CRAN
-during the last `{r} max_days` days. The table shows the date when a
+during the last `r max_days` days. The table shows the date when a
 package was dropped by CRAN and their reason[^3] for it. If a package
 has since been resubmitted and is waiting in the CRAN incoming queue,
 it is marked as "resubmitted" (in the 'event' column).  Links to the
 most recent CRAN checks and the source code are also provided.  If a
-package does not return to CRAN within `{r} max_days` days, it is
+package does not return to CRAN within `r max_days` days, it is
 removed also from CRANhaven[^4].
 
 [^1]: When a package is _archived_, the archived version is still
