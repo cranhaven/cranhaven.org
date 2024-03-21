@@ -108,6 +108,20 @@ captalize <- function(x) {
 
 history <- cranhaven_packages()
 incoming <- cran_incoming()
+
+## NOTE: If the same package is submitted multiple times to CRAN, it may
+## show up as multiple entries in CRAN incoming, e.g.
+## 1 MetaNet 0.1.2   newbies 2024-03-22 00:19:00
+## 2 MetaNet 0.1.2   inspect 2024-03-21 01:25:00
+## We need to all, but the latest submission to avoid duplicated in
+## the dashboard.
+incoming <- incoming[order(incoming$time, decreasing = TRUE), ]
+for (pkg in unique(incoming$package)) {
+  idxs <- which(incoming$package == pkg)
+  ## Drop any but the first
+  if (length(idxs) > 1) incoming <- incoming[-idxs[-1], ]
+}
+
 incoming <- incoming[, c("package", "folder")]
 colnames(incoming)[2] <- "cran_incoming"
 history <- merge(history, incoming, by = "package", all.x = TRUE)
