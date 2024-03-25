@@ -125,7 +125,7 @@ history <- rename(history,
 )
 
 idxs <- which(!is.na(history$cran_incoming))
-history$event[idxs] <- paste(history$event[idxs], '<a href="https://r-hub.github.io/cransays/articles/dashboard.html">resubmitted</a>', sep = ", ")
+history$event[idxs] <- paste(history$event[idxs], '<a href="https://nx10.github.io/cransubs/">resubmitted</a>', sep = ", ")
 
 history$reason <- gsub("'([[:alnum:].]+)'", '<a href="https://cran.r-project.org/package=\\1">\\1<a>', history$reason)
 
