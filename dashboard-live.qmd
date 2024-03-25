@@ -176,7 +176,7 @@ history$links <- links
 
 history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
 
-history <- history[, c("date", "package", "event", "reason", "links")]
+history <- history[, c("date", "package", "event", "reason", "maintainer", "links")]
 
 # Show only recent packages
 library("DT")
