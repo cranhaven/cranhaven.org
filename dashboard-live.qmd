@@ -174,7 +174,21 @@ keep <- !is.na(values)
 links[keep] <- paste(links[keep], values[keep], sep = ", ")
 history$links <- links
 
+values <- vapply(history$maintainer, FUN.VALUE = NA_character_, FUN = function(value) {
+  if (is.na(value)) return(value)
+  pattern <- "^[[:space:]]*([^<]*)[[:space:]]*<([^>]*)>.*$"
+  name <- sub(pattern, "\\1", value)
+  name <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", name)
+  email <- sub(pattern, "\\2", value)
+  email <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", email)
+  email <- sub("@", "-at-", email)
+  sprintf('<a href="mailto:%s">%s</a>', email, name)
+})
+values <- unname(values)
+history$maintainer <- values
+
 history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
+
 
 history <- history[, c("date", "package", "event", "reason", "maintainer", "links")]
 
