@@ -179,6 +179,7 @@ values <- vapply(history$maintainer, FUN.VALUE = NA_character_, FUN = function(v
   pattern <- "^[[:space:]]*([^<]*)[[:space:]]*<([^>]*)>.*$"
   name <- sub(pattern, "\\1", value)
   name <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", name)
+  name <- gsub("(^\"|\"$)", "", name)
   email <- sub(pattern, "\\2", value)
   email <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", email)
   email <- sub("@", "-at-", email)
