@@ -98,12 +98,6 @@ history <- rename(history,
   "reason" = x_cran_comment_reason
 )
 
-age <- difftime(Sys.Date(), history$date, units = "days")
-age_label <- sprintf("%s&nbsp;days&nbsp;ago", age)
-age_label[age == 1] <- "1&nbsp;day&nbsp;ago"
-age_label[age == 0] <- "today"
-history$date <- sprintf("%s <small>(%s)</small>", history$date, age_label)
-
 idxs <- which(!is.na(history$cran_incoming))
 history$event[idxs] <- paste(history$event[idxs], sprintf('<small><a href="https://nx10.github.io/cransubs/pkg#%s">resubmitted/%s</a></small>', history$package[idxs], history$cran_incoming[idxs]), sep = "<br>")
 
@@ -170,6 +164,11 @@ history$maintainer <- values
 
 history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
 
+age <- difftime(Sys.Date(), history$date, units = "days")
+age_label <- sprintf("%s&nbsp;days&nbsp;ago", age)
+age_label[age == 1] <- "1&nbsp;day&nbsp;ago"
+age_label[age == 0] <- "today"
+history$date <- sprintf("%s <small>(%s)</small>", history$date, age_label)
 
 history <- history[, c("date", "package", "event", "reason", "maintainer", "links")]
 
