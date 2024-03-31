@@ -60,7 +60,8 @@ cran_incoming <- local({
   
   function() {
     if (!is.null(data)) return(data)
-    db <- ciw::incoming(folder = c("pretest", "recheck", "inspect", "pending", "waiting", "newbies"), check = FALSE)
+    folders <- ciw:::known_folders
+    db <- ciw::incoming(folder = folders, check = FALSE)
     db <- as.data.frame(db)
     colnames(db) <- tolower(colnames(db))
     db$package <- gsub("_.*", "", db$name)
