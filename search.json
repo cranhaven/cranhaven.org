@@ -1,5 +1,33 @@
 [
   {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
+  },
+  {
+    "objectID": "cran-archiving-stats.html",
+    "href": "cran-archiving-stats.html",
+    "title": "Study: Many Archived Packages Return to CRAN",
+    "section": "",
+    "text": "CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources1 on CRAN, we have found that 36% of the archived packages get unarchived at some point (Revilla 2022). The median time for these packages to return to CRAN is ~33 days."
+  },
+  {
+    "objectID": "cran-archiving-stats.html#analysis",
+    "href": "cran-archiving-stats.html#analysis",
+    "title": "Study: Many Archived Packages Return to CRAN",
+    "section": "Analysis",
+    "text": "Analysis\n\nSummary of how long it takes packages to be unarchived\n\n#&gt;   times_archived packages     min      q1     mean  median       q3       max\n#&gt; 1              1     3661  1 days  9 days 122 days 33 days 121 days 3292 days\n#&gt; 2              2      774  1 days  8 days  91 days 27 days  87 days 1949 days\n#&gt; 3              3      203  1 days  6 days  80 days 22 days  76 days  882 days\n#&gt; 4              4       68  1 days 10 days  72 days 23 days  66 days  652 days\n#&gt; 5              5       16  1 days  3 days  24 days 13 days  31 days   93 days\n#&gt; 6              6        3 17 days 22 days  30 days 27 days  36 days   45 days\n\n\n\nReturn time for packages archived only once in their lifetime\n\n\n\n\n\nEmpirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN.\n\n\n\n\n\n\nCumulative number of archived packages over the years\n\n\n\n\n\nPackages actions done by the CRAN Team over time. The CRAN Team may take different actions for packages currently on e.g. archived (solid red), orphaned (dotted yellow), removed (dashed green), renamed (dashed blue), and unarchived (dotted purple). Presented is the cumulative number of such events over time on the linear (left) and the logarithmic (right) scale.\n\n\n\n\n\n\nDays to return versus date when archived\n\n\n\n\n\nPackages being archived and returning to CRAN. Each data point represents when a CRAN package was archived (horizontal axis) and when it was unarchived (vertical axis). If more than one package was archive and unarchived on the same dates, the corresponding data point is presented as a larger disk. The gray dashed line is the event horizon.\n\n\n\n\n\n\nDistribution of number of days for packages to return to CRAN\n\n\n\n\n\nHistogram of how long packages remain archived on CRAN. Each bar represents a week. Most packages return to CRAN within a month."
+  },
+  {
+    "objectID": "cran-archiving-stats.html#footnotes",
+    "href": "cran-archiving-stats.html#footnotes",
+    "title": "Study: Many Archived Packages Return to CRAN",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nData sources used are tools:::CRAN_current_db(), tools:::CRAN_archive_db(), and PACKAGES.in.↩︎"
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "CRANhaven",
@@ -35,27 +63,6 @@
     "text": "Footnotes\n\n\nCRANhaven is served via R-universe. The “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.↩︎\nThe five-week limit is based on our results showing that the median time for a package to return to CRAN is 30 days.↩︎"
   },
   {
-    "objectID": "cran-archiving-stats.html",
-    "href": "cran-archiving-stats.html",
-    "title": "Study: Many Archived Packages Return to CRAN",
-    "section": "",
-    "text": "CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources1 on CRAN, we have found that 36% of the archived packages get unarchived at some point (Revilla 2022). The median time for these packages to return to CRAN is ~33 days."
-  },
-  {
-    "objectID": "cran-archiving-stats.html#analysis",
-    "href": "cran-archiving-stats.html#analysis",
-    "title": "Study: Many Archived Packages Return to CRAN",
-    "section": "Analysis",
-    "text": "Analysis\n\nSummary of how long it takes packages to be unarchived\n\n#&gt;   times_archived packages     min      q1     mean  median       q3       max\n#&gt; 1              1     3661  1 days  9 days 122 days 33 days 121 days 3292 days\n#&gt; 2              2      774  1 days  8 days  91 days 27 days  87 days 1949 days\n#&gt; 3              3      203  1 days  6 days  80 days 22 days  76 days  882 days\n#&gt; 4              4       68  1 days 10 days  72 days 23 days  66 days  652 days\n#&gt; 5              5       16  1 days  3 days  24 days 13 days  31 days   93 days\n#&gt; 6              6        3 17 days 22 days  30 days 27 days  36 days   45 days\n\n\n\nReturn time for packages archived only once in their lifetime\n\n\n\n\n\nEmpirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN.\n\n\n\n\n\n\nCumulative number of archived packages over the years\n\n\n\n\n\nPackages actions done by the CRAN Team over time. The CRAN Team may take different actions for packages currently on e.g. archived (solid red), orphaned (dotted yellow), removed (dashed green), renamed (dashed blue), and unarchived (dotted purple). Presented is the cumulative number of such events over time on the linear (left) and the logarithmic (right) scale.\n\n\n\n\n\n\nDays to return versus date when archived\n\n\n\n\n\nPackages being archived and returning to CRAN. Each data point represents when a CRAN package was archived (horizontal axis) and when it was unarchived (vertical axis). If more than one package was archive and unarchived on the same dates, the corresponding data point is presented as a larger disk. The gray dashed line is the event horizon.\n\n\n\n\n\n\nDistribution of number of days for packages to return to CRAN\n\n\n\n\n\nHistogram of how long packages remain archived on CRAN. Each bar represents a week. Most packages return to CRAN within a month."
-  },
-  {
-    "objectID": "cran-archiving-stats.html#footnotes",
-    "href": "cran-archiving-stats.html#footnotes",
-    "title": "Study: Many Archived Packages Return to CRAN",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nData sources used are tools:::CRAN_current_db(), tools:::CRAN_archive_db(), and PACKAGES.in.↩︎"
-  },
-  {
     "objectID": "dashboard-live.html",
     "href": "dashboard-live.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
@@ -68,12 +75,5 @@
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is a rare event, the removed package version is completely removed from CRAN, and no longer available for download. Earlier versions might be available in the CRAN archive area.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site"
   }
 ]
