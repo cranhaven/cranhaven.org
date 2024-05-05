@@ -127,6 +127,18 @@ over_unarchived <- out |>
   pull(package)
 ```
 
+```{r missing_new}
+# Packages not registered when they were first included
+# Presumably because they are too new to be included yet on the PACKAGES.in file.
+no_new <- out |> 
+  summarise(.by = package,
+            missing_news = any(sum(action == "unarchived") > sum(action == "new")),
+            starts_without_new = any(action[date == min(date, na.rm = TRUE)] != "new")) |> 
+  filter(missing_news | starts_without_new) |> 
+  pull(package)
+```
+
+
 ```{r history-back, echo = FALSE}
 more <- out |> 
   filter(action != "unarchived") |> 
@@ -145,7 +157,7 @@ more <- out |>
 library("tidyr")
 pw <- more |> 
   select(package, times_archived, action, date) |> 
-  pivot_wider(names_from =action, values_from = date) |> 
+  pivot_wider(names_from = action, values_from = date) |> 
   mutate(timediff = difftime(new, archived, units = "days"))
 ```
 
@@ -158,6 +170,7 @@ median time for these packages to return to CRAN is ~33 days.
 [^1]: Data sources used are `tools:::CRAN_current_db()`,
 `tools:::CRAN_archive_db()`, and [PACKAGES.in].
 
+[PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
 
 ## Analysis
 
@@ -183,7 +196,7 @@ pw |> summarise(.by = times_archived,
 
 ```{r plot-ecdf}
 #| fig-cap: "Empirical distribution of the time it takes packages to get
-#| unarchived as a function of number of days since being archived on CRAN."
+#|  unarchived as a function of number of days since being archived on CRAN."
 library("ggplot2")
 pw |> 
   filter(times_archived == "1") |>
@@ -200,16 +213,96 @@ pw |>
 
 ```
 
+### Return time for packages archived
+
+```{r plot-ecdf-all}
+#| fig-cap: "Empirical distribution of the time it takes packages to get
+#|  unarchived as a function of number of days since being archived on CRAN."
+pw |> 
+  ggplot() +
+  stat_ecdf(aes(timediff)) +
+  coord_cartesian(xlim =  c(0, 365), expand = FALSE) +
+  scale_y_continuous(labels = scales::label_percent(), sec.axis = dup_axis()) +
+  scale_x_continuous(breaks = 30*1:12) +
+  theme_minimal() +
+  labs(title = "Time for packages to be back on CRAN",
+       y = "Percentage of packages back on CRAN",
+       x = "Days till packages are back on CRAN")
+
+```
+
+### Return time for packages
+
+```{r}
+first_publ <- out |> 
+  filter(!package %in% no_new) |> 
+  summarise(.by = package,
+            first = min(date[action == "new"], na.rm =  TRUE))
+  
+publication_archived <- pw |> 
+  left_join(pw0, by = join_by(package)) |> 
+  mutate(timediff2 = difftime(new, archived, units = "weeks"),
+         time_since_first = difftime(archived, first, units = "weeks"))
+publication_archived |> 
+  ggplot() +
+  geom_point(aes(time_since_first, timediff2, col = times_archived)) +
+  labs(x = "Time from publication to archival (weeks)",
+       y = "Time since archival to new submission (weeks)",
+       col = "Times archived",
+       title = "Newer packages are archived sooner and take longer to be fixed",
+       subtitle = "Not adjusted to the number of packages published") +
+  scale_x_continuous(expand = expansion(add = NA_integer_)) +
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA))) +
+  theme_minimal() +
+  theme(legend.position = "inside", legend.position.inside = c(0.8, 0.7),
+        legend.background = element_rect(), plot.title.position = "plot")
+  
+publication_archived |> 
+  ggplot() +
+  geom_point(aes(archived, timediff2, col = times_archived)) +
+  geom_abline(intercept = Sys.Date(), slope = -2) +
+  geom_rug(aes(new, timediff2), sides = "l") +
+  scale_y_continuous(expand = expansion(mult = c(0, NA), add = c(0, NA)), 
+                     sec.axis = dup_axis()) +
+  theme_minimal() +
+  labs(title = "Time for packages to be back on CRAN",
+       y = "Time since archival (weeks)",
+       x = "Date of archival",
+       col = "Times archived") +
+  theme(legend.position = "inside", legend.position.inside = c(0.85, 0.7),
+        legend.background = element_rect(), plot.title.position = "plot")
+publication_archived |> 
+  ggplot() +
+  geom_point(aes(first, timediff2, col = times_archived)) +
+  geom_abline(intercept = Sys.Date(), slope = -2) +
+  geom_rug(aes(new, timediff2), sides = "l") +
+  scale_y_continuous(expand = expansion(mult = c(0, NA), add = c(0, NA)), 
+                     sec.axis = dup_axis()) +
+  theme_minimal() +
+  labs(title = "Time for packages to be back on CRAN",
+       y = "Time since archival (weeks)",
+       x = "Date of publication",
+       col = "Times archived") +
+  theme(legend.position = "inside", legend.position.inside = c(0.85, 0.7),
+        legend.background = element_rect(), plot.title.position = "plot")
+
+publication_archived |> 
+  ggplot() +
+  geom_histogram(aes(timediff2), binwidth = 4) +
+  labs(x = "Time from archival to acceptance (weeks)") +
+  theme_minimal()
+```
+
 
 ### Cumulative number of archived packages over the years
 
 ```{r plot-cumulative}
 #| fig-cap: "**Packages actions done by the CRAN Team over time**.
-#| The CRAN Team may take different actions for packages currently on
-#| e.g. archived (solid red), orphaned (dotted yellow), removed
-#| (dashed green), renamed (dashed blue), and unarchived (dotted purple).
-#| Presented is the cumulative number of such events over time on the linear
-#| (left) and the logarithmic (right) scale."
+#|  The CRAN Team may take different actions for packages currently on
+#|  e.g. archived (solid red), orphaned (dotted yellow), removed
+#|  (dashed green), renamed (dashed blue), and unarchived (dotted purple).
+#|  Presented is the cumulative number of such events over time on the linear
+#|  (left) and the logarithmic (right) scale."
 library("patchwork")
 p <- full_history |> 
   filter(!is.na(action), !is.na(date)) |> 
@@ -241,11 +334,11 @@ p + scale_y_continuous(expand = expansion()) +
 
 ```{r plot-events}
 #| fig-cap: "**Packages being archived and returning to CRAN.**
-#| Each data point represents when a CRAN package was archived (horizontal
-#| axis) and when it was unarchived (vertical axis).
-#| If more than one package was archive and unarchived on the same dates,
-#| the corresponding data point is presented as a larger disk.
-#| The gray dashed line is the event horizon."
+#|    Each data point represents when a CRAN package was archived (horizontal
+#|    axis) and when it was unarchived (vertical axis).
+#|    If more than one package was archive and unarchived on the same dates,
+#|    the corresponding data point is presented as a larger disk.
+#|    The gray dashed line is the event horizon."
 pw |> 
   ggplot() +
   geom_count(aes(archived, timediff)) +
@@ -266,7 +359,7 @@ pw |>
 
 ```{r plot-distribution}
 #| fig-cap: "**Histogram of how long packages remain archived on CRAN**. 
-#| Each bar represents a week. Most packages return to CRAN within a month."
+#|  Each bar represents a week. Most packages return to CRAN within a month."
 pw |> 
   ggplot() +
   geom_histogram(aes(timediff), binwidth = 7) +
@@ -277,5 +370,230 @@ pw |>
        title = "Time till packages are back to CRAN")
 ```
 
+### Packages archived over all
 
-[PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
+```{r}
+n_distinct(out$package[out$action == "archived"])
+nrow(available.packages())
+```
+
+
+### Other¿?
+
+```{r}
+out |> 
+  group_by(package) |> 
+  count(archived = action == "archived") |> 
+  ungroup() |> 
+  filter(archived) |> 
+  count(n, name = "packages") |> 
+  ggplot() +
+  geom_line(aes(n, packages)) +
+  scale_x_continuous(breaks = 1:6, expand = expansion()) +
+  scale_y_continuous(breaks = c(0, 1:7*1000)) +
+  theme_minimal() +
+  labs(x = "Archived times", title = "Times a package has been archived")
+  
+```
+
+
+### Packages not addressed in time
+
+```{r history_failed}
+not_addressed <- grepl("not addressed", history_df$comment, fixed = TRUE )
+not_corrected <- grepl("not corrected", history_df$comment, fixed = TRUE )
+history_failed <- history_df[not_addressed | not_corrected, ]
+rownames(history_failed) <- NULL
+# FIXME: This assumes that if any in back the package is back!!
+history_failed[history_failed$package %in% pw$package, "back"] <- "yes"
+history_failed$back[is.na(history_failed$back)] <- "no"
+multiple_archived <- history_failed |> 
+  count(package) |> 
+  count(mult = n > 1) |> 
+  filter(mult == TRUE) |> 
+  pull(n)
+```
+
+
+Packages are archived because they are not addressed/corrected in time.
+If we look in more detail on this packages we see there are `r length(unique(history_failed$package))` packages that failed to correct in time. Most of them where archived but some where orphaned (`r sum(history_failed$action == "orphaned")`), and some of them (`r multiple_archived`) were archived multiple times.
+
+
+```{r}
+#| fig-cap: "**Packages archived because problems were not fixed on time are mostly back.**.
+#|  Packages that got archived because maintainers couldn't fix the packages on time got back on time"
+history_failed2 <- history_failed[!is.na(history_failed$date), ]
+ggplot(history_failed2) +
+  geom_histogram(aes(date, fill = back), col = "lightgray", bins = 50) +
+  scale_x_date(date_breaks = "4 months", date_labels = "%y-%m", 
+               expand = expansion(add = NA_integer_, mult = 0)) +
+  labs(y = "Packages", x = element_blank(), fill = "Back on CRAN",
+       title = "Packages with failed checks are back on CRAN") +
+  theme_minimal() +
+  scale_fill_manual(values = c("no" = "red", "yes" = "green")) +
+  theme(axis.text.x = element_text(angle = 90), 
+        legend.position = "inside", legend.position.inside = c(0.2, 0.75),
+        legend.background = element_rect()) +
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA)))
+```
+
+
+#### Linked to R-releases?
+
+```{r}
+rver <- rversions::r_versions() |> 
+  mutate(date = as.Date(date)) |> 
+  filter(endsWith(version, ".0"))
+
+r_next <- function(rver, date) {
+  w <- max(which(unique(date) > rver$date), na.rm = TRUE) +1
+  if (w > length(rver$date)) {
+    return(NA)
+  }
+  rver$date[w]
+}
+
+r_release <- function(rver, date) {
+  # The next one to the one that is smaller than the date. 
+  w <- max(which(unique(date) > rver$date), na.rm = TRUE)
+  rver$date[w]
+}
+
+hf_timediff <- history_failed2 |> 
+  arrange(date) |> 
+  group_by(date) |>  
+  mutate(date_r_rel = r_release(rver, date), 
+         date_r_next = r_next(rver, date),
+         time_since_rel = difftime(date, date_r_rel, units = "week"),
+         time_before_next = difftime(date, date_r_next, units = "week"),
+         ) 
+hf_timediff |> 
+  ggplot() +
+  geom_histogram(aes(abs(time_before_next), fill = back), col = "lightgray", bins = 54) +
+  theme_minimal() +
+  scale_y_continuous(expand = expansion(add = 0, mult = c(0, NA))) +
+  scale_x_continuous(expand = expansion()) +
+  labs(y = "Archived packages", fill = "Back on CRAN?", 
+       x = "Time before next release (days)",
+       title = "Packages archived with failing text before next release") +
+  theme(legend.position = "inside", legend.position.inside = c(0.7, 0.89),
+        plot.title.position = "plot", legend.background = element_rect()) 
+hf_timediff |> 
+  ggplot() +
+  geom_histogram(aes(time_since_rel, fill = back), col = "lightgray", bins = 54) +
+  scale_y_continuous(expand = expansion(add = 0, mult = c(0, NA)),
+                     sec.axis = dup_axis()) +
+  scale_x_continuous(expand = expansion()) +
+  labs(y = "Archived packages", fill = "Back on CRAN?", 
+       x = "Time since previous release (days)",
+       title = "Packages archived with failing text since last release") +
+  theme_minimal() +
+  theme(legend.position = "inside", legend.position.inside = c(0.2, 0.89),
+        plot.title.position = "plot", legend.background = element_rect()) 
+hf_timediff |> 
+  ggplot() +
+  geom_count(aes(time_since_rel, abs(time_before_next))) +
+  theme_minimal()
+
+ggplot(hf_timediff) +
+  geom_histogram(aes(time_before_next + time_since_rel, fill = back), 
+                 col = "lightgray", binwidth = 4) +
+  annotate("text", x = 45, y = 210, label = "Previous release") +
+  annotate("text", x = -45, y = 210, label = "Next release") +
+  labs(y = "Packages", x = "Time to R release (weeks)", fill = "Back on CRAN?",
+       title = "Packages archived in relation to R releases") +
+  scale_x_continuous(expand = expansion()) +
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA))) +
+  theme_minimal() +
+  theme(legend.position = "inside", legend.position.inside = c(0.5, 0.75),
+        plot.title.position = "plot", legend.background = element_rect())
+```
+
+
+#### Age of archival
+
+```{r}
+out_failed <- out[out$package %in% history_failed2$package, ]
+not_addressed <- grepl("not addressed", out_failed$comment, fixed = TRUE )
+not_corrected <- grepl("not corrected", out_failed$comment, fixed = TRUE )
+out_failed$check[not_addressed | not_corrected] <- "yes"
+of <- out_failed |> 
+  filter(!package %in% over_unarchived,
+         !package %in% no_new) |> 
+  group_by(package) |> 
+  mutate(first = min(date[action == "new"], na.rm = TRUE),
+         failed_check = if_else(!is.na(check) & check == "yes", 1L, 0L),
+         n_check = cumsum(failed_check) - failed_check) |> 
+  # Keep only needed data (starting by 0 the groups)
+  filter(n_check <= sum(failed_check) - 1) |>
+  ungroup() |> 
+  summarise(.by = c(package, n_check),
+            first_subm = unique(first),
+            previous_subm = date[max(which(action == "new"), na.rm = TRUE)],
+            date_archived = date[max(which(check == "yes"), na.rm = TRUE)]) |> 
+  ungroup()
+
+of2 <- of |>
+  mutate(time_since_publ = difftime(date_archived, first_subm, units = "weeks"),
+         time_since_prev = difftime(previous_subm, first_subm, units = "weeks"))
+
+ggplot(of2) +
+  geom_point(aes(time_since_publ, time_since_prev))
+ggplot(of2) +
+  geom_histogram(aes(time_since_publ), binwidth = 52)
+ggplot(of2) +
+  geom_histogram(aes(time_since_prev), binwidth = 52)
+
+of2 |> 
+  ggplot() +
+  geom_count(aes(date_archived, time_since_publ))
+of2 |> 
+  ggplot() +
+  geom_count(aes(date_archived, time_since_prev, col = time_since_publ))
+
+of2 |> 
+  count(archived_same_date_submission = date_archived == previous_subm) |> 
+  mutate(rel = n/sum(n))
+```
+
+### Archived because depends on other packages
+
+```{r}
+depends <- grepl("depends on", out$comment, fixed = TRUE )
+out_depends <- out[depends, ]
+packages <- gsub(".*'(.+)'.*", "\\1", out_depends$comment)
+packages[grepl("\\s", packages)] <- NA
+out_depends$dependency_package <- packages
+rownames(out_depends) <- NULL
+# FIXME: This assumes that if any in back the package is back!!
+out_depends[out_depends$package %in% pw$package, "back"] <- "yes"
+out_depends$back[is.na(out_depends$back)] <- "no"
+
+out_depends |> 
+  filter(!is.na(dependency_package)) |> 
+  count(dependency_package, sort = TRUE, name = "Affected packages") |> 
+  count(`Affected packages`, name = "packages")
+
+out_depends |> 
+  left_join(first_publ, by = join_by(package)) |> 
+  mutate(time_archival = difftime(date, first, units = "weeks")) |> 
+  filter(!is.na(time_archival)) |> 
+  ggplot() +
+  geom_histogram(aes(first)) +
+  labs(x = "Date first submission",
+       y = "Packages",
+       title = "Packages archived due to dependencies.") +
+  theme_minimal() +
+  scale_x_date(expand = expansion(), date_breaks = "2 years", date_labels = "%Y") +
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA)))
+```
+
+
+### Maintainers
+
+#### Failing email
+
+```{r}
+sum(grepl("maintainer address", out$comment))
+```
+
