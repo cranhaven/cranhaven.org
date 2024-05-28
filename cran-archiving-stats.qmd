@@ -294,13 +294,14 @@ times_unarchived <- out |>
 ```{r resubmissions-data}
 if (!file.exists("20240519_cdh.RDS")) {
   cdh <- cransays::download_history()
+  saveRDS(cdh, file = "20240519_cdh.RDS")
+} else {
+  cdh <- readRDS("20240519_cdh.RDS")
 }
-saveRDS(cdh, file = "20240519_cdh.RDS")
 
 library("lubridate", warn.conflicts	 = FALSE)
 cran_submissions <- cdh |> 
-  filter(!is.na(version),
-         package %in% unique(pw$package)) |> 
+  filter(!is.na(version)) |> 
   distinct(package, version, snapshot_time) |> 
   arrange(package, snapshot_time) |> 
   group_by(package, version) |> 
@@ -312,9 +313,20 @@ cran_submissions <- cdh |>
 ```{r all-data}
 archived <- out |> 
   group_by(package) |> 
-  mutate(first_reacceptance = min(date[action == "accepted"])) |> 
-  filter(cumsum(action == "archived") >= 1) |> 
-  ungroup()
+  mutate(v_archived = cumsum(action == "archived"),
+         v_accepted = cumsum(action == "accepted"),
+         first_accepted = min(date[action == "accepted"]),
+         last_accepted = max(date[action == "accepted" & lag(v_archived, default = max(v_archived)) == v_archived])) |>  
+  group_by(package, v_accepted) |> 
+  mutate(previous_version = max(date[action == "accepted"])) |> 
+  ungroup() |> 
+  group_by(package) |> 
+  tidyr::fill(previous_version) |> 
+  ungroup() |> 
+  mutate(last_accepted = if_else(is.infinite(last_accepted), first_accepted, last_accepted),
+         previous_version = if_else(is.infinite(previous_version), min(date), previous_version)) |> 
+  filter(v_archived >= 1)
+
 archived_resubmitted <- merge(archived, cran_submissions, all.x = TRUE) |> 
   filter(action == "archived",
          # This removes cases when submission was before archived
@@ -322,6 +334,7 @@ archived_resubmitted <- merge(archived, cran_submissions, all.x = TRUE) |>
   mutate(
     not_addressed = grepl("not addressed", comment, fixed = TRUE ),
     not_corrected = grepl("not corrected", comment, fixed = TRUE ),
+    not_fixed = grepl("not fixed", comment, fixed = TRUE ),
     depends_on = grepl("depend(s|ed) on", comment),
     requires = grepl("as require[sd]", comment),
     archived = grepl("archived package", comment, fixed = TRUE),
@@ -345,30 +358,35 @@ archived_resubmitted <- merge(archived, cran_submissions, all.x = TRUE) |>
   summarise(.by = c(package, date),
             initial_resubmission = min(initial_resubmission),
             maintainer_address = any(maintainer_address | email_bounced),
-            not_fixed = any(not_addressed | not_corrected),
+            not_fixed = any(not_addressed | not_corrected | not_fixed),
             archived_by_dep = any(depends_on | requires | archived),
             requested = any(requested),
             policy_violation = any(policy_violation),
-            first_reacceptance = unique(first_reacceptance),
+            first_accepted = unique(first_accepted),
+            last_accepted = unique(last_accepted),
+            previous_version = unique(previous_version),
             # accepted = tail(accepted, 1),
             dp = unique(dp)
             ) |> 
   # Remove those submissions that are after some already archived version.
   group_by(package) |> 
   mutate(initial_resubmission = if_else(
-    initial_resubmission > lead(date, default = Sys.Date()), NA, initial_resubmission)) |> 
+    initial_resubmission > lead(date, default = Sys.Date()), NA, initial_resubmission),
+    time_since_first = difftime(date, first_accepted, units = "weeks"), 
+    ) |> 
   ungroup() 
 
 archived_all <- merge(times_unarchived, archived_resubmitted, all = TRUE,
                       by.x = c("package", "archived"),
                       by.y = c("package", "date")) |> 
+  mutate(.by = package, first_reacceptance = min(accepted)) |> 
   mutate(before_registry = archived < as.Date("2020-09-12"), 
          back_on_cran = case_when(
            before_registry & !is.na(first_reacceptance) ~ "Accepted",
-           before_registry &  is.na(first_reacceptance) ~ "Unknown",
+           before_registry &  is.na(first_reacceptance) ~ "No",
           !before_registry & !is.na(first_reacceptance) ~ "Accepted",
           !before_registry &  is.na(first_reacceptance) & !is.na(initial_resubmission) ~ "Rejected",
-          !before_registry &  is.na(first_reacceptance) & !is.na(initial_resubmission) ~ "Never resubmitted",
+          !before_registry &  is.na(first_reacceptance) & is.na(initial_resubmission) ~ "Never resubmitted",
          .default = "Unkown2"),
          delay_submission = difftime(initial_resubmission, archived, units = "days"),
          delay_accepted = difftime(accepted, archived, units = "days"),
@@ -402,6 +420,7 @@ archived_all_versions <- archived_all |>
          date_r_next = r_next(rver, archived),
          time_since_rel = difftime(archived, date_r_rel, units = "week"),
          time_before_next = difftime(archived, date_r_next, units = "week"),
+         time_since_previous = difftime(archived, previous_version, units = "weeks")
          ) |> 
   ungroup() |> 
   filter(!is.na(date_r_rel))
@@ -412,14 +431,16 @@ archived_all_versions <- archived_all |>
 ```{r table-times}
 #| tbl-cap: "**Table with Summary statistics of time to get back to CRAN.** q1: 1st quartile; q3: 3rd quartile."
 fiu <- function(x){is(x, "difftime")}
-archived_all_versions |> summarise(.by = times_archived, 
-                packages = n(), 
-                min = min(timediff), 
-                q1 = quantile(timediff, 0.25), 
-                mean = mean(timediff), 
-                median = median(timediff), 
-                q3 = quantile(timediff, 0.75), 
-                max = max(timediff)) |> 
+archived_all_versions |> 
+  filter(!is.na(accepted)) |> 
+  summarise(.by = time_archived, 
+            packages = n(), 
+            min = min(archived2accepted, na.rm = TRUE), 
+            q1 = quantile(archived2accepted, 0.25, na.rm = TRUE), 
+            mean = mean(archived2accepted, na.rm = TRUE), 
+            median = median(archived2accepted, na.rm = TRUE), 
+            q3 = quantile(archived2accepted, 0.75, na.rm = TRUE), 
+            max = max(archived2accepted, na.rm = TRUE)) |> 
   mutate(across(where(fiu), round)) |> 
   as.data.frame() |> 
   knitr::kable()
@@ -432,10 +453,10 @@ archived_all_versions |> summarise(.by = times_archived,
 #| fig-cap: "Empirical distribution of the time it takes packages to get
 #|  unarchived as a function of number of days since being archived on CRAN for the first time."
 library("ggplot2")
-pw |> 
-  filter(times_archived == "1") |>
+archived_all_versions |> 
+  filter(time_archived == "1") |>
   ggplot() +
-  stat_ecdf(aes(timediff)) +
+  stat_ecdf(aes(archived2accepted)) +
   coord_cartesian(xlim =  c(0, 365), expand = FALSE) +
   scale_y_continuous(labels = scales::label_percent(), 
                      sec.axis = dup_axis(name = element_blank())) +
@@ -453,9 +474,9 @@ pw |>
 ```{r plot-ecdf-all}
 #| fig-cap: "Empirical distribution of the time it takes packages to get
 #|  unarchived as a function of number of days since being archived on CRAN."
-pw |> 
+archived_all_versions |> 
   ggplot() +
-  stat_ecdf(aes(timediff)) +
+  stat_ecdf(aes(archived2accepted)) +
   coord_cartesian(xlim =  c(0, 365), expand = FALSE) +
   scale_y_continuous(labels = scales::label_percent(), 
                      sec.axis = dup_axis(name = element_blank())) +
@@ -470,29 +491,24 @@ pw |>
 ### Return time for packages
 
 ```{r return-time}
-first_publ <- out |> 
-  filter(!package %in% no_accepted) |> 
-  summarise(.by = package,
-            first = min(date[action == "accepted"], na.rm =  TRUE))
-
-publication_archived <- pw |> 
-  left_join(first_publ, by = join_by(package)) |> 
-  mutate(timediff2 = difftime(accepted, archived, units = "weeks"),
-         time_since_first = difftime(archived, first, units = "weeks"))
 library("forcats")
-publication_archived |> 
+archived_all_versions |> 
   mutate(package = fct_reorder(package, archived, .fun = min)) |> 
   ggplot() +
   # geom_point(aes(archived, package), shape = "square") +
   # geom_point(aes(accepted, package)) +
-  geom_segment(aes(y = package, x = accepted, xend = archived, col = -timediff2)) +
+  geom_segment(aes(y = package, x = accepted, xend = archived, col = archived2accepted)) +
   scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
+  scale_color_continuous(transform = "reverse") +
+  labs(x = "Accepted date", y = "Pacakge", col = "Time (days)",
+       title = "Packages sorted by date of acceptance and their time off CRAN") +
   theme_minimal() +
   theme(axis.text.y = element_blank(), 
         panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
-publication_archived |> 
+
+archived_all_versions |> 
   ggplot() +
-  geom_point(aes(time_since_first, timediff2, col = times_archived)) +
+  geom_point(aes(time_since_first, time_since_previous, col = time_archived)) +
   labs(x = "Time from publication to archival (weeks)",
        y = "Time since archival to new accepted pacakge (weeks)",
        col = "Times archived",
@@ -505,11 +521,10 @@ publication_archived |>
   theme(legend.position = "inside", legend.position.inside = c(0.8, 0.7),
         legend.background = element_rect(), plot.title.position = "plot")
   
-publication_archived |> 
+archived_all_versions |> 
   ggplot() +
-  geom_point(aes(archived, timediff2, col = times_archived)) +
+  geom_point(aes(archived, time_since_previous, col = time_archived)) +
   geom_abline(intercept = Sys.Date(), slope = -2) +
-  geom_rug(aes(accepted, timediff2), sides = "l") +
   scale_y_continuous(expand = expansion(mult = c(0, NA), add = c(0, NA)), 
                      sec.axis = dup_axis()) +
   theme_minimal() +
@@ -519,11 +534,10 @@ publication_archived |>
        col = "Times archived") +
   theme(legend.position = "inside", legend.position.inside = c(0.85, 0.7),
         legend.background = element_rect(), plot.title.position = "plot")
-publication_archived |> 
+archived_all_versions |> 
   ggplot() +
-  geom_point(aes(first, timediff2, col = times_archived)) +
+  geom_point(aes(first_accepted, archived2accepted, col = time_archived)) +
   geom_abline(intercept = Sys.Date(), slope = -2) +
-  geom_rug(aes(accepted, timediff2), sides = "l") +
   scale_y_continuous(expand = expansion(mult = c(0, NA), add = c(0, NA)), 
                      sec.axis = dup_axis()) +
   theme_minimal() +
@@ -534,9 +548,9 @@ publication_archived |>
   theme(legend.position = "inside", legend.position.inside = c(0.85, 0.7),
         legend.background = element_rect(), plot.title.position = "plot")
 
-publication_archived |> 
+archived_all_versions |> 
   ggplot() +
-  geom_histogram(aes(timediff2), binwidth = 4) +
+  geom_histogram(aes(archived2accepted), binwidth = 4) +
   labs(x = "Time from archival to acceptance (weeks)") +
   theme_minimal()
 ```
@@ -574,7 +588,7 @@ p + scale_y_continuous(expand = expansion()) +
     title = "Accumulation of actions on packages",
   ) +
   plot_layout(guides = 'collect', axes = "collect") &
-  theme(legend.position='bottom')
+  theme(legend.position = 'bottom')
 ```
 
 
@@ -587,11 +601,11 @@ p + scale_y_continuous(expand = expansion()) +
 #|    If more than one package was archive and unarchived on the same dates,
 #|    the corresponding data point is presented as a larger disk.
 #|    The gray dashed line is the event horizon."
-pw |> 
+archived_all_versions |> 
   ggplot() +
-  geom_count(aes(archived, timediff)) +
+  geom_count(aes(archived, archived2accepted)) +
   geom_abline(slope = -1, intercept = Sys.Date(), linetype = 2, col = "gray") +
-  geom_rug(aes(archived, timediff), sides = "b", outside = TRUE, length = unit(0.015, "npc"), 
+  geom_rug(aes(archived, archived2accepted), sides = "b", outside = TRUE, length = unit(0.015, "npc"), 
            col = "gray") +
   theme_minimal() +
   coord_cartesian(clip = "off") +
@@ -610,9 +624,9 @@ pw |>
 ```{r plot-distribution}
 #| fig-cap: "**Histogram of how long packages remain archived on CRAN**. 
 #|  Each bar represents a week. Most packages return to CRAN within a month."
-pw |> 
+archived_all_versions |> 
   ggplot() +
-  geom_histogram(aes(timediff), binwidth = 7) +
+  geom_histogram(aes(archived2accepted), binwidth = 7) +
   theme_minimal() +
   scale_y_continuous(expand = expansion(c(0, NA), c(0, NA))) +
   labs(y = "Packages that got back",
@@ -629,14 +643,8 @@ Which results in  `r scales::percent(n_distinct(out$package[out$action == "archi
 ```{r packages-archived}
 #| fig-cap: "**Packages are archived multiple times**.
 #|  Packages that got archived are sometimes back on CRAN and archived again"
-packages_archived <- out |> 
-  summarise(.by = package, 
-            archived = sum(action == "archived"),
-            unarchived = sum(action == "unarchived")) |> 
-  # Clean inconsistencies on the data taking the most conservative approach
-  mutate(archived = if_else(archived - unarchived < 0,  unarchived, archived)) |>
-  mutate(unarchived = if_else(archived - unarchived > 1,  archived - 1, unarchived)) |> 
-  filter(archived >= 1)
+packages_archived <- archived_all_versions |> 
+  filter(.by = package, any(time_archived > 1))
 
 pa_histo <- packages_archived |> 
   ggplot() +
@@ -767,71 +775,53 @@ archived_all |>
 ### Packages not addressed in time
 
 ```{r history-failed}
-not_addressed <- grepl("not addressed", out$comment, fixed = TRUE )
-not_corrected <- grepl("not corrected", out$comment, fixed = TRUE )
-history_failed <- out[out$package %in% out$package[not_addressed | not_corrected], ]
-rownames(history_failed) <- NULL
-history_failed$back[history_failed$package %in% current_packages] <- "yes"
-history_failed$back[is.na(history_failed$back)] <- "no"
-
-
-hf <- history_failed |> 
-  filter(action != "unarchived") |> 
-  filter(!package %in% over_unarchived) |> 
+multiple_archived <- archived_all_versions |> 
   group_by(package) |> 
-  # Keep those packages archived once
-  filter(cumsum(action == "archived") >= 1,
-         # Removes some 5k packages that only have one remaining action.
-         n() >= 2,
-         sum(action == "accepted") >= sum(action == "archived")
-         ) |> 
-  filter(action == "archived")
-  # mutate(lead = lead(action, default = NA),
-  #        lag = lag(action, default = NA),
-  #        n = 1:n()) |> 
-  # filter((action == "archived" & lead == "accepted") | 
-  #          (action == "accepted" & lag == "archived")) |>
-  # # A string with the number of times that a given packages was archived (and there is a new)
-  # mutate(times_archived = rep(1:n(), each = 2, length.out = n())) |> 
-  # ungroup() |> 
-  # # Checking that the actions are consecutive
-  # group_by(package, times_archived) |> 
-  # filter(last(n) - first(n) == 1) |> 
-  # ungroup() |> 
-  # select(package, times_archived, action, date) |> 
-  # pivot_wider(names_from = action, values_from = date) |> 
-  # mutate(timediff = difftime(accepted, archived, units = "days"))
-
-multiple_archived <- history_failed |> 
-  summarise(.by = package, archived = sum(action == "archived")) |> 
-  count(mult = archived > 1) |> 
+  filter(any(not_fixed)) |> 
+  ungroup() |> 
+  count(mult = time_archived > 1) |> 
   filter(mult == TRUE) |> 
   pull(n)
 ```
 
 
 Packages are archived because they are not addressed/corrected in time.
-If we look in more detail on this packages we see there are `r length(unique(history_failed$package))` packages that failed to correct in time. Most of them where archived but some where orphaned (`r sum(history_failed$action == "orphaned")`), and some of them (`r multiple_archived`) were archived multiple times.
+If we look in more detail on this packages we see there are `r length(unique(archived_all_versions$package[archived_all_versions$not_fixed]))` packages that failed to correct in time. 
+Most of them where archived once but some of them (`r multiple_archived`) were archived multiple times.
 
 
 ```{r failed-check-archived}
 #| fig-cap: "**Packages archived because problems were not fixed on time are mostly back.**.
 #|  Packages that got archived because maintainers couldn't fix the packages on time got back on time"
-hf |> 
+
+legend <- c("Accepted" = "green", "Never resubmitted" = "orange", 
+            "Rejected" = "red", "No" = "darkgray")
+archived_all_versions |> 
+  filter(not_fixed) |> 
   ggplot() +
-  geom_histogram(aes(date, fill = back), bins = 8*12) +
-  scale_fill_manual(values = c("no" = "red", "yes" = "green")) +
+  geom_histogram(aes(archived, fill = back_on_cran), bins = 8*12) +
+  scale_fill_manual(values = legend) +
   scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA)), 
                      sec.axis = dup_axis(name = element_blank())) +
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", 
                expand = expansion(add = NA_integer_, mult = 0)) +
-  labs(y = "Events", x = element_blank(), fill = "Back on CRAN",
-       title = "Packages with failed checks are back on CRAN") +
+  labs(y = "Events", x = element_blank(), fill = "Back on CRAN?",
+       title = "Packages with failed checks go back to CRAN?") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90), 
         panel.grid.minor.x = element_blank(),
         legend.position = "inside", legend.position.inside = c(0.2, 0.75),
         legend.background = element_rect()) 
+```
+
+
+```{r tbl-not-fixed}
+#| tbl-cap: "**Tally of reasons of packages not fixed**. Many packages are not 
+#|  fixed and the maintainer address."
+archived_all_versions |> 
+  filter(!is.na(not_fixed) & !requested) |>
+  count(not_fixed, maintainer_address, policy_violation, sort = TRUE) |> 
+  knitr::kable(align = "c")
 ```
 
 
@@ -852,7 +842,7 @@ archived_all_versions |>
 
 archived_all_versions |> 
   ggplot() +
-  geom_histogram(aes(time_since_rel, fill = back), col = "lightgray", bins = 54) +
+  geom_histogram(aes(time_since_rel, fill = back_on_cran), col = "lightgray", bins = 54) +
   scale_y_continuous(expand = expansion(add = 0, mult = c(0, NA)),
                      sec.axis = dup_axis()) +
   scale_x_continuous(expand = expansion()) +
@@ -886,17 +876,11 @@ ggplot(archived_all_versions) +
 #### Age of archival
 
 ```{r aged}
-out_failed <- out[out$package %in% history_failed$package, ]
-not_addressed <- grepl("not addressed", out_failed$comment, fixed = TRUE )
-not_corrected <- grepl("not corrected", out_failed$comment, fixed = TRUE )
-out_failed$check[not_addressed | not_corrected] <- "yes"
-out_failed$check[!(not_addressed | not_corrected)] <- "no"
-
-of <- out_failed |> 
-  filter(!package %in% pkg_failing_qc) |> 
+of <- archived_all_versions |> 
+  filter(!package %in% not_checked) |> 
   # Allow acceptance in the same day as archived
   arrange(package, date, action) |> 
-  mutate(failed_check = as.numeric(check == "yes")) |> 
+  mutate(failed_check = as.numeric(not_fixed)) |> 
   group_by(package) |> 
   mutate(first = min(date[action == "accepted"], na.rm = TRUE),
          n_check = cumsum(failed_check) - failed_check) |> 
@@ -915,105 +899,74 @@ of <- out_failed |>
   ungroup() |> 
   mutate(time_since_publ = difftime(date_archived, first_subm, units = "weeks"),
          time_since_prev = difftime(previous_subm, first_subm, units = "weeks"))
-
-ggplot(of) +
-  geom_count(aes(time_since_publ, time_since_prev))
-ggplot(of) +
-  geom_histogram(aes(time_since_publ), binwidth = 52)
-ggplot(of) +
-  geom_histogram(aes(time_since_prev), binwidth = 52)
-
-of |> 
+# Some are simply impossible:
+# time_since_first shouldn't be negative. DirichletReg, CDS, AgroR: the archives are missing versions
+# Probably there is a typo in the date DirichletReg could have been archived in 2020-05-03 instead of 2010-05-03 and unarchived on 2020-05-29 (27 days later instead of 10)
+impossible_dates <- archived_all_versions |> 
+  filter(time_since_first <= 0 & time_since_previous > 50) |> 
+  pull(package) |> 
+  setdiff(pkg_failing_qc)
+# DirichletReg WhopGenome permGPU IOHanalyzer NACHO testextra hpa transfR symengine TDA AgroR Matching
+archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
   ggplot() +
-  geom_count(aes(date_archived, time_since_publ, col = time_since_prev)) +
-  geom_smooth(aes(date_archived, time_since_publ))
-
-of |> 
+  geom_count(aes(time_since_first, time_since_previous))
+archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
   ggplot() +
-  geom_count(aes(date_archived, time_since_prev, col = time_since_publ)) +
-  geom_smooth(aes(date_archived, time_since_prev))
+  geom_histogram(aes(time_since_first), binwidth = 52)
+archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
+  ggplot() +
+  geom_histogram(aes(time_since_previous), binwidth = 52)
 
-of |> 
-  count(archived_same_date_submission = date_archived == previous_subm) |> 
-  mutate(rel = percent(n/sum(n)))
+archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
+  ggplot(aes(archived, time_since_first)) +
+  geom_count(aes(col = time_since_previous)) +
+  geom_smooth(span = 0.1, method = "loess") +
+  scale_x_date(expand = expansion()) +
+  scale_y_continuous(expand = expansion(), 
+                     sec.axis = sec_axis(transform = ~./52, name = "(~Years)",
+                                         breaks = seq(0, 24, by = 2))) +
+  theme_minimal() +
+  labs(x = "Date a package was archived", y = "Time since inclusion in CRAN (weeks)",
+       size = "Events", col = "Since prev. (w)",
+       title = "Age of packages archived")
+
+archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
+  ggplot() +
+  geom_count(aes(archived, time_since_previous, col = time_since_previous)) +
+  geom_smooth(aes(archived, time_since_previous), method = "loess", span = 0.1) +
+  scale_color_continuous(trans = "reverse") +
+  scale_x_date(expand = expansion()) +
+  scale_y_continuous(expand = expansion(), 
+                     sec.axis = sec_axis(transform = ~./52, name = "(~Years)",
+                                         breaks = seq(0, 14, by = 2))) +
+  theme_minimal() +
+  labs(x = "Date a package was archived",
+       y = "Time since previous release (weeks)",
+       size = "Events",
+       col = "Since prev. (w)",
+       title = "Time since previous release") 
 ```
 
 ### Archived because depends on other packages
 
 ```{r depending-on}
-out_depends <- out |> 
-  group_by(package) |> 
-  filter(any(grepl("depends on", comment, fixed = TRUE))) |> 
-  ungroup() |> 
-  mutate(
-    # From WRE: "This should contain only (ASCII) letters, numbers and dot, 
-    # have at least two characters and start with a letter and not end in a dot. "
-    # Not fully compliant but close enough ( including quotations to find them)
-    # gm <- gregexpr("['\\\"]([[:alnum:]\\.]+)['\\\"]", out_depends$comment)
-    position_package = gregexpr("['\\\"]([[:alnum:]\\.]+)['\\\"]", comment),
-    possible_packages = regmatches(comment, position_package),
-    dependency_package = lapply(possible_packages, gsub, pattern = "\\\"|'", replacement = ""),
-    # FIXME find the package closest to the archived word (in the 2 cases it affects)
-    # For the moment pick the first package
-    dp = sapply(dependency_package, function(x) {x[1]}),
-    archived_by_dep = action == "archived" & grepl("depends on", comment, fixed = TRUE)) |> 
-  select(-position_package, -possible_packages, -dependency_package, -comment) |> 
-  group_by(package) |> 
-  # Only keep those archiving due to dependencies
-  mutate(arch_time = cumsum(archived_by_dep)) |> 
-  filter(cumsum(!is.na(dp)) >= 1,
-         cumsum(action == "archived") <= arch_time) |> 
-  tidyr::fill(dp, .direction = "down") |> 
-  group_by(package, arch_time) |> 
-  reframe(back = any(action %in% c("unarchived", "accepted")),
-          dp = unique(dp),
-          date_back = head(date[action %in% c("unarchived", "accepted")], 1),
-          date = date[action == "archived"]) |> 
-  mutate(diff = difftime(date_back, date, units = "days"))
-
-packages_archived <- out |> 
-  filter(package %in% date_archived$dp) |> 
-  group_by(package) |> 
-  filter(cumsum(action == "archived") >= 1) |> 
-  ungroup()
-# Note there are some 7 packages mentioned as archived but not present in records
-missing_log_packages <- out_depends |> 
-  filter(!is.na(dependency_package), !dependency_package %in% out$package) |> 
-  pull(dependency_package)
-
-# FIXME: This assumes that if any in back the package is back!!
-# Instead of checking if the package was ever back after being archived 
-# and causing problems to other packages
-out_depends$ever_back[out_depends$package %in% pw$package] <- "yes"
-out_depends$ever_back[is.na(out_depends$ever_back)] <- "no"
-
-out_depends$current_back[out_depends$package %in% current_packages] <- "yes"
-out_depends$current_back[is.na(out_depends$current_back)] <- "no"
-
-
-out_depends$dep_ever_back[out_depends$package_depends %in% pw$package] <- "yes"
-out_depends$dep_ever_back[is.na(out_depends$dep_ever_back)] <- "no"
-
-out_depends$dep_current_back[out_depends$package_depends %in% current_packages] <- "yes"
-out_depends$dep_current_back[is.na(out_depends$dep_current_back)] <- "no"
-
-
-out_depends |> 
-  filter(!is.na(dependency_package)) |> 
-  count(dependency_package, sort = TRUE, name = "Affected packages") |> 
+archived_all_versions |> 
+  filter(!is.na(dp)) |> 
+  count(dp, sort = TRUE, name = "Affected packages") |> 
   count(`Affected packages`, name = "packages")
 
-out_depends |> 
-  left_join(first_publ, by = join_by(package)) |> 
-  mutate(time_archival = difftime(date, first, units = "weeks")) |> 
-  filter(!is.na(time_archival)) |> 
+archived_all_versions |> 
+  filter(!is.na(dp)) |> 
+  count(archived, back_on_cran, name = "events", sort = TRUE) |>
   ggplot() +
-  geom_histogram(aes(first)) +
-  labs(x = "Date first submission",
-       y = "Packages",
-       title = "Packages archived due to dependencies.") +
+  geom_histogram(aes(events, fill = back_on_cran), bins = 10) +
+  scale_fill_manual(values = legend) +
   theme_minimal() +
-  scale_x_date(expand = expansion(), date_breaks = "2 years", date_labels = "%Y") +
   scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA)))
 ```
 
@@ -1023,5 +976,19 @@ out_depends |>
 #### Failing email
 
 ```{r}
-sum(grepl("maintainer address", out$comment))
+archived_all_versions |> 
+  filter(maintainer_address) |> 
+  ggplot(aes(archived, time_since_previous)) +
+  geom_count() +
+  geom_smooth() +
+  scale_x_date(expand = expansion()) +
+  scale_size(range = c(2, 6)) +
+  scale_y_continuous(expand = expansion(), 
+                     sec.axis = sec_axis(transform = ~./52, name = "(~Years)",
+                                         breaks = seq(0, 14, by = 2))) +
+  theme_minimal() +
+  labs(x = "Date package was archived",
+       y = "Time since previous version (weeks)",
+       size = "Evenets",
+       title = "Maintainers are now more responsive")
 ```
