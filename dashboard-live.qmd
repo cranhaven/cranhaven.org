@@ -21,32 +21,6 @@ knitr::opts_chunk$set(
 max_days <- 5*7
 ```
 
-The below table lists all R packages that are no longer on CRAN,
-because they have been either archived[^1] on or removed[^2] from CRAN
-during the last `r max_days` days. The table shows the date when a
-package was dropped by CRAN and their reason[^3] for it. If a package
-has since been resubmitted and is waiting in the CRAN incoming queue,
-it is marked as "resubmitted" (in the 'event' column).  Links to the
-most recent CRAN checks and the source code are also provided.  If a
-package does not return to CRAN within `r max_days` days, it is
-removed also from CRANhaven[^4].
-
-[^1]: When a package is _archived_, the archived version is still
-available in the [CRAN archive area] together with all previous
-versions.
-
-[^2]: When a package is _removed_, which is a rare event, the removed
-package version is completely removed from CRAN, and no longer
-available for download. Earlier versions might be available in the
-[CRAN archive area].
-
-[^3]: The _reason_, which is based on the [CRAN Repository Policy], is
-extracted from CRAN's manually curated [PACKAGES.in] database.
-
-[^4]: If a package falls off also CRANhaven, it may still be
-installable from the [CRAN mirror on R-universe].
-
-
 ```{r dashboard}
 library("dplyr")
 
@@ -86,7 +60,8 @@ cran_incoming <- local({
   
   function() {
     if (!is.null(data)) return(data)
-    db <- ciw::incoming(folder = c("pretest", "recheck", "inspect", "pending", "waiting", "newbies"), check = FALSE)
+    folders <- ciw:::known_folders
+    db <- ciw::incoming(folder = folders, check = FALSE)
     db <- as.data.frame(db)
     colnames(db) <- tolower(colnames(db))
     db$package <- gsub("_.*", "", db$name)
@@ -97,17 +72,22 @@ cran_incoming <- local({
   }
 })
 
-captalize <- function(x) {
-  vapply(x, FUN.VALUE = NA_character_, FUN = function(s) {
-    if (is.na(s) || nchar(s) == 0) return(s)
-    first <- substr(s, start = 1L, stop = 1L)
-    tail <- substr(s, start = 2L, stop = nchar(s))
-    paste0(toupper(first), tail)
-  })
-}
-
 history <- cranhaven_packages()
 incoming <- cran_incoming()
+
+## NOTE: If the same package is submitted multiple times to CRAN, it may
+## show up as multiple entries in CRAN incoming, e.g.
+## 1 MetaNet 0.1.2   newbies 2024-03-22 00:19:00
+## 2 MetaNet 0.1.2   inspect 2024-03-21 01:25:00
+## We need to all, but the latest submission to avoid duplicated in
+## the dashboard.
+incoming <- incoming[order(incoming$time, decreasing = TRUE), ]
+for (pkg in unique(incoming$package)) {
+  idxs <- which(incoming$package == pkg)
+  ## Drop any but the first
+  if (length(idxs) > 1) incoming <- incoming[-idxs[-1], ]
+}
+
 incoming <- incoming[, c("package", "folder")]
 colnames(incoming)[2] <- "cran_incoming"
 history <- merge(history, incoming, by = "package", all.x = TRUE)
@@ -120,7 +100,7 @@ history <- rename(history,
 )
 
 idxs <- which(!is.na(history$cran_incoming))
-history$event[idxs] <- paste(history$event[idxs], '<a href="https://r-hub.github.io/cransays/articles/dashboard.html">resubmitted</a>', sep = ", ")
+history$event[idxs] <- paste(history$event[idxs], sprintf('<small><a href="https://nx10.github.io/cransubs/pkg#%s">resubmitted/%s</a></small>', history$package[idxs], history$cran_incoming[idxs]), sep = "<br>")
 
 history$reason <- gsub("'([[:alnum:].]+)'", '<a href="https://cran.r-project.org/package=\\1">\\1<a>', history$reason)
 
@@ -128,7 +108,6 @@ idxs <- which(!is.na(history$x_cran_history))
 history$reason[idxs] <- paste(history$reason[idxs], sprintf("<br><small><em>Previously</em>: %s</small>", gsub("\n", " ", history$x_cran_history[idxs])), sep = ". ")
 history$reason[-idxs] <- paste0(history$reason[-idxs], ".")
 history$reason <- gsub("[.]+", ".", history$reason)
-history$reason <- captalize(history$reason)
 
 ## SPECIAL CASE: Package has just returned to CRAN?
 idxs <- which(is.na(history$event))
@@ -150,16 +129,89 @@ if (length(idxs) > 0) {
 
 
 
-history$links <- with(history, paste(
+links <- with(history, paste(
   sprintf('<a href="https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html">checks</a>', sub("-.*", "", date), date, package),
   sprintf('<a href="https://github.com/cran/%s">source</a>', package),
   sep = ", "
 ))
 
+values <- vapply(history$package_url, FUN.VALUE = NA_character_, FUN = function(url) {
+  if (is.na(url)) return(url)
+  url <- strsplit(url, split = ",")[[1]]
+  url <- gsub("(^[[:space:]]+|[[:space:]]+$)", "", url)
+  names(url) <- sprintf("url%d", seq_along(url))
+  names(url)[1] <- "url"
+  url <- sprintf('<a href="%s">%s</a>', url, names(url))
+  paste(url, collapse = ", ")
+})
+values <- unname(values)
+keep <- !is.na(values)
+links[keep] <- paste(links[keep], values[keep], sep = ", ")
+history$links <- links
+
+values <- vapply(history$maintainer, FUN.VALUE = NA_character_, FUN = function(value) {
+  if (is.na(value)) return(value)
+  pattern <- "^[[:space:]]*([^<]*)[[:space:]]*<([^>]*)>.*$"
+  name <- sub(pattern, "\\1", value)
+  name <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", name)
+  name <- gsub("(^\"|\"$)", "", name)
+  email <- sub(pattern, "\\2", value)
+  email <- gsub("(^[[:space:]]*|[[:space:]]*$)", "", email)
+  email <- sub("@", "-at-", email)
+  sprintf('<a href="mailto:%s">%s</a>', email, name)
+})
+values <- unname(values)
+history$maintainer <- values
+
 history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
 
-history <- history[, c("date", "package", "event", "reason", "links")]
+age <- difftime(Sys.Date(), history$date, units = "days")
+age_label <- sprintf("%s&nbsp;days&nbsp;ago", age)
+age_label[age == 1] <- "1&nbsp;day&nbsp;ago"
+age_label[age == 0] <- "today"
+history$date <- sprintf("%s <small>(%s)</small>", history$date, age_label)
 
+history <- history[, c("date", "package", "event", "reason", "maintainer", "links")]
+
+n <- nrow(history)
+n_resubmitted <- nrow(subset(history, grepl("resubmitted", event)))
+resubmitted_info <- if (n_resubmitted == 0) {
+  "no packages"
+} else if (n_resubmitted == 1) {
+  "one package"
+} else {
+  sprintf("%d packages", n_resubmitted)
+}
+```
+
+The below table lists all `r nrow(history)` R packages that are no
+longer on CRAN, because they have been either archived[^1] on or
+removed[^2] from CRAN during the last `r max_days` days. The table
+shows the date when a package was dropped by CRAN and their reason[^3]
+for it. If a package has since been resubmitted and is waiting in the
+CRAN incoming queue, it is marked as "resubmitted" (in the 'event'
+column; currently `r resubmitted_info`).  Links to the most recent
+CRAN checks and the source code are also provided.  If a package does
+not return to CRAN within `r max_days` days, it is removed also from
+CRANhaven[^4].
+
+[^1]: When a package is _archived_, the archived version is still
+available in the [CRAN archive area] together with all previous
+versions.
+
+[^2]: When a package is _removed_, which is a rare event, the removed
+package version is completely removed from CRAN, and no longer
+available for download. Earlier versions might be available in the
+[CRAN archive area].
+
+[^3]: The _reason_, which is based on the [CRAN Repository Policy], is
+extracted from CRAN's manually curated [PACKAGES.in] database.
+
+[^4]: If a package falls off also CRANhaven, it may still be
+installable from the [CRAN mirror on R-universe].
+
+
+```{r}
 # Show only recent packages
 library("DT")
 datatable(history,
