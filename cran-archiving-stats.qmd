@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 ```{r cran-history, echo = FALSE}
 # Searches packages in PACKAGES.in file and extracts relevant information.
 library("dplyr")
+options(repos ="https://cloud.r-project.org")
 Sys.setLanguage("en")
+
 url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
 con <- url(url)
 file <- read.dcf(con) |> 
@@ -327,7 +329,8 @@ cran_submissions <- cdh |>
     min(snapshot_time, submission_time, na.rm = TRUE),
     tz = tz(cdh$snapshot_time)
     ))) |> 
-  ungroup()
+  ungroup() |> 
+  select(-version)
 # Date we started recording the CRAN submission queue.
 start_archive <- min(as.Date(cdh$snapshot_time))
 ```
@@ -350,9 +353,9 @@ archived <- pkg_history |>
   filter(v_archived >= 1, action == "archived")
 
 archived_resubmitted <- merge(archived, cran_submissions, all.x = TRUE) |> 
-  filter(action == "archived",
-         # This removes cases when submission was before archived
-         is.na(initial_resubmission) | initial_resubmission >= date) |> 
+  filter(# This removes cases when submission was before archived
+         is.na(initial_resubmission) | 
+           !is.na(initial_resubmission) & initial_resubmission >= date) |> 
   mutate(
     not_addressed = grepl("not addressed", comment, fixed = TRUE ),
     not_corrected = grepl("not corrected", comment, fixed = TRUE ),
@@ -403,9 +406,10 @@ archived_all <- merge(times_unarchived, archived_resubmitted, all = TRUE,
   mutate(before_registry = (archived < start_archive | 
                               initial_resubmission < start_archive) & 
            !(archived > start_archive),
-         initial_resubmission = if_else(is.na(initial_resubmission) & 
-                                          !is.na(accepted) & 
-                                          accepted > start_archive, 
+         
+         initial_resubmission = if_else(is.na(initial_resubmission) &
+                                          !is.na(accepted) &
+                                          accepted > start_archive,
                                         accepted, initial_resubmission),
   # Decision tree
   #                       Accepted => Accepted
@@ -431,7 +435,6 @@ archived_all <- merge(times_unarchived, archived_resubmitted, all = TRUE,
          delay_accepted = difftime(accepted, archived, units = "days"),
          delay_acceptance = difftime(accepted, initial_resubmission, units = "days"),
          time_since_first_v = difftime(archived, first_accepted, units = "weeks"),
-         time_since_last_v = difftime(archived, previous_accepted, units = "weeks"),
          time_archived = if_else(is.na(time_archived), 1, time_archived))
 # For future references
 legend <- c("Accepted" = "green", "Never resubmitted" = "orange", 
@@ -559,7 +562,7 @@ archived_all_versions |>
 ```
 
 
-```{r return-time}
+```{r return-time, eval=FALSE}
 library("forcats")
 archived_all_versions |> 
   filter(!is.na(accepted), !package %in% all_failing_qc) |>
@@ -579,11 +582,12 @@ archived_all_versions |>
 ```
 
 
-```{r return-time2}
+```{r return-time2, eval=FALSE}
+#| fig-cap: ""
 archived_all_versions |> 
-  filter(!is.na(time_since_first), !package %in% all_failing_qc) |>
+  filter(!is.na(time_since_first_v), !package %in% all_failing_qc) |>
   ggplot() +
-  geom_point(aes(time_since_first, time_since_previous, col = time_archived)) +
+  geom_count(aes(time_since_first_v, time_since_previous, col = time_archived)) +
   labs(x = "Time from publication to archival (weeks)",
        y = "Time since archival to new accepted pacakge (weeks)",
        col = "Times archived",
@@ -599,6 +603,9 @@ archived_all_versions |>
 
 
 ```{r return-time3}
+#| fig-cap: "**Packages archived and date since the previous release.** The 
+#|  color indicates if a given package was archived multiple times: the more 
+#|  times it has been archived the lighter the point is."
 archived_all_versions |> 
   filter(!is.na(time_since_previous), !package %in% all_failing_qc) |>
   ggplot() +
@@ -726,7 +733,8 @@ Which results in  `r scales::percent(n_distinct(pkg_history$package[pkg_history$
 
 ```{r packages-archived}
 #| fig-cap: "**Packages are archived multiple times**.
-#|  Packages that got archived are sometimes back on CRAN and archived again"
+#|  Packages archived are sometimes back on CRAN and archived again."
+library("forcats")
 pa_histo <- archived_all_versions |> 
   summarise(.by = c(package, back_on_cran), time_archived = max(time_archived)) |> 
   mutate(back_on_cran = fct_relevel(back_on_cran, "Unknown", "Never resubmitted", "Not fit", "Accepted")) |> 
@@ -740,7 +748,6 @@ pa_histo <- archived_all_versions |>
        y = "Packages",
        fill = "Resubmission process",
        title = "Times a package has been archived")
-library("forcats")
 pa_bar <- archived_all_versions |> 
   summarise(.by = c(package, back_on_cran),
             time_archived = max(time_archived)) |> 
@@ -859,10 +866,9 @@ Those maintainers might need help to get their packages back on CRAN.
 ```{r archived2resubmit}
 #| fig-cap: "**Submissions are slightly faster for those that are accepted.** Percentage of packages that are submitted before a given time."
 resubm_t <- archived_all_versions |> 
-  mutate(archived2resubmit = difftime(initial_resubmission, archived, units = "weeks"))  |> 
-  filter(!is.na(archived2resubmit)) |> 
+  filter(!is.na(delay_submission)) |> 
   ggplot() +
-  stat_ecdf(aes(archived2resubmit, col = back_on_cran)) +
+  stat_ecdf(aes(delay_submission, col = back_on_cran)) +
   scale_color_manual(values = legend) +
   scale_y_continuous(labels = label_percent(), expand = expansion(c(0, 0.005), c(0, 0.005))) +
   scale_x_continuous(expand = expansion()) +
@@ -874,14 +880,7 @@ resubm_t <- archived_all_versions |>
   theme(plot.title.position = "plot",
         legend.position = "inside", legend.position.inside = c(0.8, 0.8),
         legend.box.background = element_rect(color = "white"))
-resubm_t_focus <- archived_all_versions |> 
-  mutate(archived2resubmit = difftime(initial_resubmission, archived, units = "days"))  |> 
-  filter(!is.na(archived2resubmit)) |> 
-  ggplot() +
-  stat_ecdf(aes(archived2resubmit, col = back_on_cran), show.legend = FALSE) +
-  scale_color_manual(values = legend) +
-  scale_y_continuous(labels = label_percent(), expand = expansion(c(0, 0.005), c(0, 0.005))) +
-  scale_x_continuous(expand = expansion()) +
+resubm_t_focus <- resubm_t +
   coord_cartesian(xlim = c(0, 90), ylim = c(0, .60)) +
   theme_minimal() + 
   labs(x = "days", y = element_blank(), title = "First 90 days") +
@@ -913,8 +912,8 @@ archived_all_versions |>
   mutate(.by =submitted,
          `% submitted` = scales::percent(events/sum(events))) |> 
   mutate(`% submitted` = if_else(!submitted, NA, `% submitted`)) |> 
-  select(-submitted) |> 
-  knitr::kable(align = "c")
+  select(-submitted, -before_registry) |> 
+  knitr::kable(align = "c", col.names = c("Back to CRAN?", "Events", "%", "% submitted"))
 ```
 
 Based on a the latest data available, which is `r percent(sample_size)` of the archived packages, slightly more than half of the packages try to get back to CRAN.
@@ -923,19 +922,25 @@ Those that try almost all of them eventually get back to CRAN.
 But how fast is the process of being back on CRAN?
 
 ```{r speed-resubmission}
+#| fig-cap: "**Resubmission delay: % spend in review after submitting a new version till it is accepted.** Only includes packages that were accepted one day later than submitted (to avoid dividing by 0)"
 subm_rel <- archived_all_versions |> 
-  filter(!is.na(initial_resubmission) & !is.na(accepted)) |> 
+  filter(!is.na(initial_resubmission) & !is.na(accepted),
+         delay_acceptance > 0) |> 
   mutate(time_rel = as.numeric(delay_acceptance)/as.numeric(delay_accepted),
-         time_perc = scales::percent(time_rel))
-subm_rel |> 
+         time_perc = scales::percent(time_rel)) |> 
+  select(package, archived, initial_resubmission, accepted, 
+         delay_acceptance, delay_accepted,
+         time_rel, time_perc)
+p_subm_rel <- subm_rel |> 
   ggplot() +
-  geom_histogram(aes(time_rel), fill = "green", bins = 50) +
+  geom_histogram(aes(time_rel), fill = "green", bins = 100) +
   scale_x_continuous(labels = scales::label_percent(), expand = expansion()) +
   scale_y_continuous(expand = expansion(), sec.axis = dup_axis(name = element_blank())) +
   labs(title = "Percentage of time to be back on CRAN spent in review",
        y = "Events", x = "Time since resubmission to be back on CRAN") +
   theme_minimal()
-subm_rel |> 
+p_subm_rel
+subm_rel_n <- subm_rel |> 
   count(tim = time_rel > 0.5) |> 
   mutate(n_rel =n/sum(n)) |> 
   filter(tim) |> 
@@ -943,9 +948,7 @@ subm_rel |>
 ```
 
 Most packages that get back to CRAN are accepted soon after submitting the new version fixing the problems of being archived.
-But some (~ `r percent(subm_rel)`) spend most of the time trying to pass checks to comply with CRAN policies: maybe trying to fix issues detected on submission or waiting for CRAN maintainers feedback.
-
-
+But some (~ `r percent(subm_rel_n)`) spend most of the time trying to pass checks to comply with CRAN policies: maybe trying to fix issues detected on submission or waiting for CRAN maintainers feedback.
 
 ### Packages not addressed in time
 
@@ -993,50 +996,68 @@ archived_all_versions |>
 #|  fixed and the maintainer address."
 archived_all_versions |> 
   filter(!is.na(not_fixed) & !requested) |>
-  count(not_fixed, maintainer_address, policy_violation, sort = TRUE) |> 
-  knitr::kable(align = "c")
+  count(not_fixed, dependency = !is.na(dp),
+        maintainer_address, policy_violation, sort = TRUE) |> 
+  knitr::kable(align = "c", col.names = c("Not fixed", "Dependencies", "Maintainer address", "Policy violation", "Packages"))
 ```
 
+The first cause of archiving is packages not fixed, the second cause is not clear
+as it seems a mix o circumstances and difficulties parsing the cause. 
+The third cause of archiving is due to a package it depends being archived and the fourth because the package didn't comply with CRAN's policy.
+The fifth most common reason is that the email address of the maintainer fails to receive emails.
 
 #### Linked to R-releases?
 
 ```{r r-versions}
+#| fig-cap: "**More packages are archived the closer the release date is.**"
 archived_all_versions |> 
   ggplot() +
   geom_histogram(aes(abs(time_before_next), fill = back_on_cran), 
-                 col = "lightgray", bins = 54) +
+                 col = "lightgray", bins = 52) +
   theme_minimal() +
   scale_y_continuous(expand = expansion(add = 0, mult = c(0, NA)), 
                      sec.axis = dup_axis(name = element_blank())) +
-  scale_x_continuous(expand = expansion()) +
+  scale_x_continuous(expand = expansion(), transform = "reverse") +
+  annotate("text", x = 0, y = 350, label = "R release", hjust = 1,
+           vjust = 0) +
   scale_fill_manual(values = legend) +
-  labs(y = "Archived packages", fill = "Back on CRAN?", 
-       x = "Time before next release (days)",
+  labs(y = "Archived packages", fill = "Submitted to CRAN?", 
+       x = "Time before next release (weeks)",
        title = "Packages archived with failing text before next release") +
   theme(legend.position = "inside", legend.position.inside = c(0.5, 0.79),
-        plot.title.position = "plot", legend.background = element_rect()) 
+        plot.title.position = "plot", legend.background = element_rect())
+```
 
+
+```{r r-versions2}
+#| fig-cap: "**Packages are usually archived weeks after a release.**"
 archived_all_versions |> 
   ggplot() +
-  geom_histogram(aes(time_since_rel, fill = back_on_cran), col = "lightgray", bins = 54) +
+  geom_histogram(aes(time_since_rel, fill = back_on_cran), col = "lightgray", bins = 52) +
   scale_y_continuous(expand = expansion(add = 0, mult = c(0, NA)),
                      sec.axis = dup_axis()) +
   scale_x_continuous(expand = expansion()) +
   scale_fill_manual(values = legend) + 
-  labs(y = "Archived packages", fill = "Back on CRAN?", 
-       x = "Time since previous release (days)",
-       title = "Packages archived with failing text since last release") +
+  annotate("text", x = 0, y = 450, label = "R release", vjust = 0, hjust = 0) +
+  labs(y = "Archived packages", fill = "Submitted to CRAN?", 
+       x = "Time since previous release (weeks)",
+       title = "Packages archived failing since last release") +
   theme_minimal() +
   theme(legend.position = "inside", legend.position.inside = c(0.5, 0.79),
         plot.title.position = "plot", legend.background = element_rect()) 
+```
 
+```{r r-versions3}
+#| fig-cap: "**Packages tend to be archived right before a release or after it but not in the middle of releases.**"
 ggplot(archived_all_versions) +
   geom_histogram(aes(time_before_next + time_since_rel, fill = back_on_cran), 
                  col = "lightgray", binwidth = 4) +
-  annotate("text", x = c(-45, 45), y = 610, label = c("Next release", "Previous release")) +
-  labs(y = "Packages", x = "Time to R release (weeks)", fill = "Back on CRAN?",
+  annotate("text", x = c(-54, 54), y = 610, 
+           label = c("Next release", "Previous release"),
+           vjust = 0, hjust = c(1, 0)) +
+  labs(y = "Packages", x = "Time to R release (weeks)", fill = "Submitted to CRAN?",
        title = "Packages archived in relation to R releases") +
-  scale_x_continuous(expand = expansion()) +
+  scale_x_continuous(expand = expansion(), transform = "reverse") +
   scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA))) +
   scale_fill_manual(values = legend) + 
   theme_minimal() +
@@ -1044,62 +1065,99 @@ ggplot(archived_all_versions) +
         plot.title.position = "plot", legend.background = element_rect())
 ```
 
+Only in 2022 and 2023 there has been a clear trend for packages that are archived closer to next release and after release respectively:
+
+```{r r- version4}
+#| fig-cap: "**Trend by year of packcages being archived.** The closer to the left the closer they are after a release, the more to the right the closer they are archived before a R-release."
+ggplot(archived_all_versions) +
+  geom_histogram(aes(time_before_next + time_since_rel), 
+                 binwidth = 4) +
+  labs(y = "Packages", x = "Time to R release (weeks)", fill = "Submitted to CRAN?",
+       title = "Packages archived in relation to R releases") +
+  scale_x_continuous(expand = expansion(), transform = "reverse") +
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA))) +
+  scale_fill_manual(values = legend) + 
+  facet_wrap(~year(archived), scales = "free_y") +
+  theme_minimal() +
+  theme(
+    # legend.position = "inside", legend.position.inside = c(0.5, 0.75),
+    plot.title.position = "plot", legend.background = element_rect(),
+    legend.position = "bottom", legend.direction = "horizontal")
+```
 
 
 #### Age of archival
 
 ```{r aged}
+#| fig-cap: "**Time since being accepted to being archived.** Most packages are 
+#|  archived soon after being accepted"
 # Some are simply impossible:
 # time_since_first shouldn't be negative. DirichletReg, CDS, AgroR: the archives are missing versions
 # Probably there is a typo in the date DirichletReg could have been archived in 2020-05-03 instead of 2010-05-03 and unarchived on 2020-05-29 (27 days later instead of 10)
 impossible_dates <- archived_all_versions |> 
-  filter(time_since_first <= 0 & time_since_previous > 50) |> 
+  filter(time_since_first_v <= 0 & time_since_previous > 50) |> 
   pull(package) |> 
   setdiff(pkg_failing_qc)
 # DirichletReg WhopGenome permGPU IOHanalyzer NACHO testextra hpa transfR symengine TDA AgroR Matching
 archived_all_versions |> 
-  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc),
+         !is.na(time_since_previous)) |> 
   ggplot() +
-  geom_count(aes(time_since_first, time_since_previous))
-archived_all_versions |> 
-  filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
+  geom_count(aes(as.numeric(time_since_first_v), as.numeric(time_since_previous))) +
+  theme_minimal()
+
+p_archived <- archived_all_versions |> 
+  filter(!package %in% c(impossible_dates, pkg_failing_qc),
+         !is.na(time_since_previous)) |> 
   ggplot() +
-  geom_histogram(aes(time_since_first), bins = 52*23) +
+  geom_histogram(aes(time_since_first_v), bins = 52*23) +
   scale_x_continuous(expand = expansion(), breaks = seq(0, 1200, 52)) +
   scale_y_continuous(expand = expansion(), breaks = seq(0, 1200, 50)) +
   labs(x = "Time since first accepted version to being archived (weeks)",
        y = "Events",
        title = "Most packages are archived shortly after being accepted") +
   theme_minimal()
+
+p_archived_zoom <- p_archived +
+  coord_cartesian(xlim = c(0, 52)) +
+  scale_x_continuous(expand = expansion(), breaks = seq(1, 52, 4)) +
+  theme(plot.background = element_rect())
+p_archived +
+  inset_element(p_archived_zoom, 0.1, 0.2, 1, 1)
 ```
 
 
 ```{r aged-public}
+#| fig-cap: "**Time since last version till the package is archived.** Most 
+#|  packages are archived shortly after a release, which might indicate that 
+#|  problems are only found after being accepted via additional checks not 
+#|  available to maintainers."
 tsp <- archived_all_versions |> 
   filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
   ggplot() +
-  geom_histogram(aes(time_since_previous), bins = 52*27) +
+  geom_histogram(aes(time_since_previous, group = version, fill = version), bins = 52*27) +
   scale_x_continuous(expand = expansion(), breaks = seq(0, 1200, 52)) +
   scale_y_continuous(expand = expansion(), breaks = seq(0, 1200, 50)) +
   theme_minimal()
-tsp_inset <- archived_all_versions |> 
-  filter(!package %in% c(impossible_dates, pkg_failing_qc),
-         time_since_previous <= 52) |> 
-  ggplot() +
-  geom_histogram(aes(time_since_previous), bins = 52) +
-  scale_x_continuous(expand = expansion(), breaks = seq(0, 1200, 4)) +
-  scale_y_continuous(expand = expansion(), breaks = seq(0, 1200, 50)) +
-  theme_minimal() +
-  theme(plot.background = element_rect())
+tsp_inset <- tsp +
+  coord_cartesian(xlim = c(0, 52)) +
+  scale_x_continuous(expand = expansion(), breaks = seq(0, 52, 4)) +
+    theme(plot.background = element_rect())
 
 tsp + 
   labs(title = "Time since acceptance till archived") +
-  inset_element(tsp_inset, 0.2, 0.2, 1, 1) & 
-  labs(x = "Time since last version (weeks)")
+  inset_element(tsp_inset, 0.15, 0.1, 1, 1) & 
+  labs(x = "Time since last version (weeks)") &
+  plot_layout(guides = "collect")
+```
 
+
+```{r aged-public1}
+#| fig-cap: "**Age of packages being archived.** Older packages are increasingly being 
+#|  archived but not at the same rate time passes."
 archived_all_versions |> 
   filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
-  ggplot(aes(archived, time_since_first)) +
+  ggplot(aes(archived, time_since_first_v)) +
   geom_count(aes(col = time_since_previous)) +
   geom_smooth(span = 0.1, method = "loess") +
   scale_x_date(expand = expansion()) +
@@ -1110,7 +1168,12 @@ archived_all_versions |>
   labs(x = "Date a package was archived", y = "Time since inclusion in CRAN (weeks)",
        size = "Events", col = "Since prev. (w)",
        title = "Age of packages archived")
+```
 
+
+```{r aged-public2}
+#| fig-cap: "**Time since previous releases of packages being archived.** Almost
+#|  a constant rate except on a a specific moments."
 archived_all_versions |> 
   filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
   ggplot() +
@@ -1131,32 +1194,69 @@ archived_all_versions |>
 
 ### Archived because depends on other packages
 
+When a package is going to be archived CRAN sends an email to the maintainer which package in trouble and all the packages maintainers that depend on it. 
+This often results in people stepping up and fixing the package.
+When this doesn't happen, packages will be archived together with their dependency.
+
 ```{r depending-on}
-archived_all_versions |> 
+#| tbl-cap: "**Dependencies impact** Most packages archived result in another package archived."
+count_deps <- archived_all_versions |> 
   filter(!is.na(dp)) |> 
-  count(dp, sort = TRUE, name = "Affected packages") |> 
-  count(`Affected packages`, name = "packages") |> 
+  count(dp, back_on_cran, sort = TRUE) |> 
+  mutate(.by = dp, 
+         `Affected packages` = sum(n))
+count_deps |> 
+  summarise(.by = `Affected packages`, 
+            Times = n()) |> 
+  arrange(`Affected packages`) |> 
   knitr::kable(align = "c")
 ```
 
 
+The packages that affected more packages lead to 18 packages archived.
+
 ```{r depending-on2}
-archived_all_versions |> 
-  filter(!is.na(dp)) |> 
-  count(archived, back_on_cran, name = "events", sort = TRUE) |>
+#| fig-cap: "**Archived packages due to a dependency often come back.** In 
+#|  absolute numbers (left) and in percentage (right). Many packages that are 
+#|  archived result in another package being archived, which are usually back to
+#|  CRAN."
+p_deps <- count_deps |> 
   ggplot() +
-  geom_histogram(aes(events, fill = back_on_cran), bins = 10) +
+  geom_col(aes(`Affected packages`, n, fill = back_on_cran)) +
   scale_fill_manual(values = legend) +
   theme_minimal() +
-  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA)))
+  scale_y_continuous(expand = expansion(add = c(0, NA), mult = c(0, NA))) +
+  scale_x_continuous( expand = expansion()) +
+  labs(x = "Dependencies affected", y = "Events", fill = "Submitted to CRAN?",
+       title = "Missing dependencies") +
+  theme(panel.grid.minor.x = element_blank(), legend.position.inside = c(0.8, 0.8),
+        legend.position = "inside", legend.background = element_rect())
+p_deps_rel <- count_deps |> 
+  mutate(.by = `Affected packages`,
+       rel = n/sum(n)) |> 
+  ggplot() +
+  geom_col(aes(`Affected packages`, rel, fill = back_on_cran), show.legend = FALSE) +
+  scale_fill_manual(values = legend) +
+  scale_x_continuous(expand = expansion()) +
+  scale_y_continuous(labels = label_percent(), expand = expansion()) +
+  theme_minimal() +
+  labs(x = "Dependencies affected", y = "Percentage of packages affected", 
+       fill = "Resubmission process",
+       title = "Percentage of packages")
+p_deps + p_deps_rel
 ```
 
+Those packages that were archived were mostly back on CRAN.
 
 ### Maintainers
 
 #### Failing email
 
+Sometimes the problem is with maintainer's email.
+
 ```{r maintainers-emails}
+#| fig-cap: "**Packages with not responsive maintainer address are archived 
+#|  later after the last version.** The line indicates the aproximation of these two variables."
 archived_all_versions |> 
   filter(maintainer_address) |> 
   ggplot(aes(archived, time_since_previous)) +
@@ -1171,5 +1271,7 @@ archived_all_versions |>
   labs(x = "Date package was archived",
        y = "Time since previous version (weeks)",
        size = "Evenets",
-       title = "Maintainers are now more responsive")
+       title = "Maintainers keep their emails")
 ```
+
+As the time increase between being archived and the failing email, this seems to indicate that maintainers are now more careful with the email given.
