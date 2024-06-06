@@ -61,6 +61,7 @@ jobs:
              echo "${file}:"
              diff -u -w "${file}" "_site/${file}" || publish=true
            done
+           git clean  -d  -f .
            git checkout main
            echo "publish=${publish}"
            echo "publish=${publish}" >> "${GITHUB_OUTPUT}"
