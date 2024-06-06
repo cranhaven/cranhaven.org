@@ -55,7 +55,7 @@ jobs:
         id: changed
         run: |
            git fetch origin gh-pages:gh-pages --depth=1
-           git checkout gh-pages
+           git checkout -f gh-pages
            publish=false
            for file in $(cd _site/; find . -name "*.html"); do
              echo "${file}:"
