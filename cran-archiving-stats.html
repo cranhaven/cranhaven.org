@@ -198,16 +198,18 @@ div.csl-indent {
 </header>
 
 
+<div class="cell">
+<pre><code>#&gt; list()</code></pre>
+</div>
 <p>CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on CRAN, we have found that 36% of the archived packages get unarchived at some point <span class="citation" data-cites="revilla_2022">(<a href="#ref-revilla_2022" role="doc-biblioref">Revilla 2022</a>)</span>. The median time for these packages to return to CRAN is ~33 days.</p>
 <section id="data-quality-checks" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality-checks">Data quality checks</h2>
-<p>First of all we will make some checks on the data to be sure of the conclusions and inferences based on it.</p>
-<p>There are 96 packages unarchived more times than archived. This could be because several reasons:</p>
+<p>To make sure our assumptions about the raw input data is valid, we will run some initial quality checks based on the data that are available as of 2024-06-21.</p>
+<p>A package should never unarchived more times than it is archive. However, there are currently 96 packages unarchived more times than archived. There could be several reasons for this:</p>
 <ul>
-<li>one of the previous issues with package lead to its removal.</li>
-<li>the term used for annotating an event was different (Orphaned instead of archived).</li>
+<li>one of the previous issues with the package lead to its removal.</li>
+<li>the term used for annotating an event was different (‘orphaned’ instead of ‘archived’).</li>
 </ul>
-<p>We also check what is the first record that CRAN has of a package.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -236,17 +238,16 @@ div.csl-indent {
 </tr>
 </tbody>
 </table>
-<p><strong>First recorded action taken of a package.</strong> Looking by date most packages’ first action recorded is being added to CRAN. For some it isn’t.</p>
+<p><strong>Figure: First recorded action taken of a package.</strong> Looking by date most packages’ first action recorded is being added to CRAN. For some it isn’t.</p>
 </div>
 </div>
-<p>If the first action recorded for a package is not its inclusion this can indicate some problems on the data that could lead to problems on the conclusions.</p>
-<p>A special mention to the removed action: This action is usually reserved to copyright issues and it is normal that it is the first action in record for a package as previous records are removed too from CRAN (package source code).</p>
-<p>By contrast, it isn’t expected that there is no record on CRAN of accepted packages, this could mean that a package was renamed or that it was removed. This happens for 134 packages.</p>
-<p>Other possible explanations for this: Maintainers of the packages might have an exchange with the CRAN volunteers that lead to unarchiving the package without new accepted packages. It could also show a missing entry in the CRAN archives.</p>
+<p>We also check what the first recorded event packages have. If the first action recorded for a package is not that it is ‘accepted’, this can indicate some problems on the data that could lead to problems on the conclusions.</p>
+<p>A special mention of the ‘removed’ action: This action is usually reserved to copyright issues and it is normal that it is the first action in record for a package as previous records are removed too from CRAN (package source code).</p>
+<p>By contrast, we should not expected lack of records on CRAN of ‘accepted’ packages. Based on the current data, this is the case for 134 packages. This could indicated that packages have been ‘renamed’ or ‘removed’. Another explanations could be that there was a dialogue between the package maintainers and the CRAN Team that lead to the package being ‘unarchived’ without new ‘accepted’ packages. It could be because of a missing entry in the CRAN data.</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption><strong>Events per package in the same date.</strong> Most packages have just one action per day. Unarchiving usually requires a new package’s version accepted the same day.</caption>
+<caption><strong>Table: Events per package in the same date.</strong> Most packages have just one action per day. Unarchiving usually requires a new package’s version accepted the same day.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: center;">Multiple actions</th>
@@ -257,12 +258,12 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">59639</td>
-<td style="text-align: center;">87%</td>
+<td style="text-align: center;">59810</td>
+<td style="text-align: center;">86%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
-<td style="text-align: center;">8971</td>
+<td style="text-align: center;">9067</td>
 <td style="text-align: center;">13%</td>
 </tr>
 <tr class="odd">
@@ -274,12 +275,12 @@ div.csl-indent {
 </table>
 </div>
 </div>
-<p>In total there are 423 unarchived events that doesn’t have the corresponding accepted package included event (on the same date). This affects 411 packages out of 9242 (4%).</p>
-<p>On the contrary there are some events that are not expected to happen on the same day:</p>
+<p>In total there are 424 ‘unarchived’ events that do not have the corresponding ‘accepted’ package included event (on the same date). Currently, this is the case for 412 packages out of 9260 (4%).</p>
+<p>On the contrary, there are some events that are not expected to happen on the same day:</p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption><strong>Actions that happend on the same date in a given package.</strong> Mostly a new acceptance lead to a package being unarchived. In some ocasions other actions.</caption>
+<caption><strong>Table: Actions that happend on the same date in a given package.</strong> Mostly a new acceptance lead to a package being unarchived. In some occasions other actions.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: center;">Multiple actions</th>
@@ -290,28 +291,28 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">accepted &amp; unarchived</td>
-<td style="text-align: center;">4279</td>
-<td style="text-align: center;">93.367%</td>
+<td style="text-align: center;">4327</td>
+<td style="text-align: center;">93.436%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">accepted &amp; orphaned</td>
 <td style="text-align: center;">121</td>
-<td style="text-align: center;">2.640%</td>
+<td style="text-align: center;">2.613%</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">accepted &amp; archived &amp; unarchived</td>
 <td style="text-align: center;">109</td>
-<td style="text-align: center;">2.378%</td>
+<td style="text-align: center;">2.354%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">accepted &amp; archived</td>
 <td style="text-align: center;">63</td>
-<td style="text-align: center;">1.375%</td>
+<td style="text-align: center;">1.360%</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">archived &amp; unarchived</td>
 <td style="text-align: center;">7</td>
-<td style="text-align: center;">0.153%</td>
+<td style="text-align: center;">0.151%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">accepted &amp; removed</td>
@@ -327,18 +328,18 @@ div.csl-indent {
 </table>
 </div>
 </div>
-<p>Those with 3 different actions imply multiple revisions from the CRAN team the same day.</p>
-<p>In total there are 620 different packages identified with problematic records/processing from 0. Some of them were found that had at two or more different issues 118. Depending on which issue they might be corrected to the best of our abilities or simply discarded depending on the issue and question we are trying to answer.</p>
+<p>Those with three different actions imply that there has been multiple revisions from the CRAN Team on the same day.</p>
+<p>In total there are 621 different packages identified with problematic records/processing from <code>r n_distinct(pkg_history$package)</code>. Out of these, 118 were found to have two or more different issues. Depending on which issue, they might be corrected to the best of our abilities, or simply be discarded depending on the issue and question we are trying to answer.</p>
 </section>
 <section id="analysis" class="level2">
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
-<p>Now that we have looked into the data quality we can start trying to answer some questions:</p>
+<p>Now that we have looked into the data quality, we can start trying to answer some questions:</p>
 <section id="summary-of-how-long-it-takes-packages-to-be-unarchived" class="level3">
 <h3 class="anchored" data-anchor-id="summary-of-how-long-it-takes-packages-to-be-unarchived">Summary of how long it takes packages to be unarchived</h3>
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption><strong>Table with summary statistics of time to get back to CRAN after being archived.</strong> Median time below 33 days.</caption>
+<caption><strong>Table: Summary statistics of time to get back to CRAN after being archived.</strong> Median time is 33 days.</caption>
 <colgroup>
 <col style="width: 19%">
 <col style="width: 12%">
@@ -364,42 +365,42 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">3317</td>
+<td style="text-align: center;">3351</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">9 days</td>
 <td style="text-align: center;">33 days</td>
-<td style="text-align: center;">126 days</td>
+<td style="text-align: center;">127 days</td>
 <td style="text-align: center;">125 days</td>
 <td style="text-align: center;">3292 days</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
-<td style="text-align: center;">654</td>
+<td style="text-align: center;">660</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">8 days</td>
-<td style="text-align: center;">27 days</td>
-<td style="text-align: center;">93 days</td>
+<td style="text-align: center;">28 days</td>
+<td style="text-align: center;">92 days</td>
 <td style="text-align: center;">90 days</td>
 <td style="text-align: center;">1949 days</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">3</td>
-<td style="text-align: center;">169</td>
+<td style="text-align: center;">172</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">7 days</td>
-<td style="text-align: center;">25 days</td>
+<td style="text-align: center;">26 days</td>
 <td style="text-align: center;">89 days</td>
-<td style="text-align: center;">77 days</td>
+<td style="text-align: center;">78 days</td>
 <td style="text-align: center;">882 days</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">4</td>
-<td style="text-align: center;">55</td>
+<td style="text-align: center;">57</td>
 <td style="text-align: center;">1 days</td>
-<td style="text-align: center;">4 days</td>
+<td style="text-align: center;">5 days</td>
 <td style="text-align: center;">17 days</td>
-<td style="text-align: center;">69 days</td>
-<td style="text-align: center;">66 days</td>
+<td style="text-align: center;">71 days</td>
+<td style="text-align: center;">67 days</td>
 <td style="text-align: center;">652 days</td>
 </tr>
 <tr class="odd">
@@ -441,7 +442,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-times-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>summary statistics of time to get back to CRAN after being archived.</strong> Same as the previous table but in graphical format.</figcaption>
+<figcaption><strong>Figure: Summary statistics of time to get back to CRAN after being archived.</strong> Graphical representation of the previous table.</figcaption>
 </figure>
 </div>
 </div>
@@ -454,7 +455,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-ecdf-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Empirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN for the first time.</figcaption>
+<figcaption><strong>Figure: Empirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN for the first time.</strong></figcaption>
 </figure>
 </div>
 </div>
@@ -467,7 +468,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-ecdf-all-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Empirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN.</figcaption>
+<figcaption><strong>Figure: Empirical distribution of the time it takes packages to get unarchived as a function of number of days since being archived on CRAN.</strong></figcaption>
 </figure>
 </div>
 </div>
@@ -477,7 +478,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/return-time3-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages archived and date since the previous release.</strong> The color indicates if a given package was archived multiple times: the more times it has been archived the lighter the point is.</figcaption>
+<figcaption><strong>Figure: Packages archived and date since the previous release.</strong> The color indicates if a given package was archived multiple times; the more times it has been archived the lighter the point is.</figcaption>
 </figure>
 </div>
 </div>
@@ -490,7 +491,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-cumulative-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages actions done by the CRAN Team over time</strong>. The CRAN Team may take different actions for packages currently on e.g.&nbsp;archived (solid red), orphaned (dotted yellow), removed (dashed green), renamed (dashed blue), and unarchived (dotted purple). Presented is the cumulative number of such events over time on the linear (left) and the logarithmic (right) scale.</figcaption>
+<figcaption><strong>Figure: Packages actions done by the CRAN Team over time</strong>. The CRAN Team may take different actions for packages currently on e.g.&nbsp;archived (solid red), orphaned (dotted yellow), removed (dashed green), renamed (dashed blue), and unarchived (dotted purple). Presented is the cumulative number of such events over time on the linear (left) and the logarithmic (right) scale.</figcaption>
 </figure>
 </div>
 </div>
@@ -503,7 +504,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-events-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages being archived and returning to CRAN.</strong> Each data point represents when a CRAN package was archived (horizontal axis) and when it was unarchived (vertical axis). If more than one package was archive and unarchived on the same dates, the corresponding data point is presented as a larger disk. The gray dashed line is the event horizon.</figcaption>
+<figcaption><strong>Figure: Packages being archived and returning to CRAN.</strong> Each data point represents when a CRAN package was archived (horizontal axis) and when it was unarchived (vertical axis). If more than one package was archive and unarchived on the same dates, the corresponding data point is presented as a larger disk. The gray dashed line is the event horizon.</figcaption>
 </figure>
 </div>
 </div>
@@ -516,7 +517,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/plot-distribution-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Histogram of how long packages remain archived on CRAN</strong>. Each bar represents a week. Most packages return to CRAN within a month.</figcaption>
+<figcaption><strong>Figure: Histogram of how long packages remain archived on CRAN</strong>. Each bar represents a week. Most packages return to CRAN within a month.</figcaption>
 </figure>
 </div>
 </div>
@@ -524,13 +525,13 @@ div.csl-indent {
 </section>
 <section id="packages-archived-over-all" class="level3">
 <h3 class="anchored" data-anchor-id="packages-archived-over-all">Packages archived over all</h3>
-<p>There have been at least 9047 packages archived from CRAN. From the total of 22901 in its whole history. Which results in 40% of all packages ever in CRAN got at one point archived.</p>
+<p>There have been at least 9065 packages archived from CRAN. From the total of 22988 in its whole history. Which results in 39% of all packages ever in CRAN got at one point archived.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/packages-archived-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages are archived multiple times</strong>. Packages archived are sometimes back on CRAN and archived again.</figcaption>
+<figcaption><strong>Figure: Packages are archived multiple times</strong>. Packages archived are sometimes back on CRAN and archived again.</figcaption>
 </figure>
 </div>
 </div>
@@ -541,7 +542,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/packages-archived-unarchived-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Most packages are not back to CRAN after being archived</strong>. Packages that got archived sometimes go back on CRAN.</figcaption>
+<figcaption><strong>Figure: Most packages are not back to CRAN after being archived</strong>. Packages that got archived sometimes go back on CRAN.</figcaption>
 </figure>
 </div>
 </div>
@@ -555,7 +556,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/archived-type-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Resubmission process by date of being archived.</strong> Events in black are those we cannot say if they were not re-submitted or rejected.</figcaption>
+<figcaption><strong>Figure: Resubmission process by date of being archived.</strong> Events in black are those we cannot say if they were not re-submitted or rejected.</figcaption>
 </figure>
 </div>
 </div>
@@ -566,7 +567,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/archived2resubmit-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Submissions are slightly faster for those that are accepted.</strong> Percentage of packages that are submitted before a given time.</figcaption>
+<figcaption><strong>Figure: Submissions are slightly faster for those that are accepted.</strong> Percentage of packages that are submitted before a given time.</figcaption>
 </figure>
 </div>
 </div>
@@ -589,21 +590,21 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Never resubmitted</td>
-<td style="text-align: center;">2549</td>
-<td style="text-align: center;">49.08%</td>
+<td style="text-align: center;">2547</td>
+<td style="text-align: center;">48.709%</td>
 <td style="text-align: center;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">Accepted</td>
-<td style="text-align: center;">2498</td>
-<td style="text-align: center;">48.09%</td>
-<td style="text-align: center;">94%</td>
+<td style="text-align: center;">2542</td>
+<td style="text-align: center;">48.614%</td>
+<td style="text-align: center;">95%</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">Not fit</td>
-<td style="text-align: center;">147</td>
-<td style="text-align: center;">2.83%</td>
-<td style="text-align: center;">6%</td>
+<td style="text-align: center;">140</td>
+<td style="text-align: center;">2.677%</td>
+<td style="text-align: center;">5%</td>
 </tr>
 </tbody>
 </table>
@@ -616,7 +617,7 @@ div.csl-indent {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/speed-resubmission-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Resubmission delay: % spend in review after submitting a new version till it is accepted.</strong> Only includes packages that were accepted one day later than submitted (to avoid dividing by 0)</figcaption>
+<figcaption><strong>Figure: Resubmission delay: % spend in review after submitting a new version till it is accepted.</strong> Only includes packages that were accepted one day later than submitted (to avoid dividing by 0)</figcaption>
 </figure>
 </div>
 </div>
@@ -624,13 +625,13 @@ div.csl-indent {
 <p>Most packages that get back to CRAN are accepted soon after submitting the new version fixing the problems of being archived. But some (~ 21%) spend most of the time trying to pass checks to comply with CRAN policies: maybe trying to fix issues detected on submission or waiting for CRAN maintainers feedback.</p>
 <section id="packages-not-addressed-in-time" class="level3">
 <h3 class="anchored" data-anchor-id="packages-not-addressed-in-time">Packages not addressed in time</h3>
-<p>Packages are archived because they are not addressed/corrected in time. If we look in more detail on this packages we see there are 5128 packages that failed to correct in time. Most of them where archived once but some of them (988) were archived multiple times.</p>
+<p>Packages are archived because they are not addressed/corrected in time. If we look in more detail on this packages we see there are 5143 packages that failed to correct in time. Most of them where archived once but some of them (1001) were archived multiple times.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/failed-check-archived-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages archived because problems were not fixed on time are mostly back.</strong>. Packages that got archived because maintainers couldn’t fix the packages on time got back on time</figcaption>
+<figcaption><strong>Figure: Packages archived because problems were not fixed on time are mostly back.</strong>. Packages that got archived because maintainers couldn’t fix the packages on time got back on time</figcaption>
 </figure>
 </div>
 </div>
@@ -639,7 +640,7 @@ div.csl-indent {
 <div id="tbl-not-fixed" class="cell quarto-float anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-not-fixed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many packages are not fixed and the maintainer address.
+Table&nbsp;1: <strong>Table: Tally of reasons of packages not fixed</strong>. Many packages are not fixed and the maintainer address.
 </figcaption>
 <div aria-describedby="tbl-not-fixed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -666,28 +667,28 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
-<td style="text-align: center;">5776</td>
+<td style="text-align: center;">5798</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
-<td style="text-align: center;">1445</td>
+<td style="text-align: center;">1449</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">TRUE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
-<td style="text-align: center;">1257</td>
+<td style="text-align: center;">1266</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">FALSE</td>
 <td style="text-align: center;">TRUE</td>
-<td style="text-align: center;">639</td>
+<td style="text-align: center;">642</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">FALSE</td>
@@ -746,7 +747,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/r-versions-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>More packages are archived the closer the release date is.</strong></figcaption>
+<figcaption><strong>Figure: More packages are archived the closer the release date is.</strong></figcaption>
 </figure>
 </div>
 </div>
@@ -756,7 +757,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/r-versions2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages are usually archived weeks after a release.</strong></figcaption>
+<figcaption><strong>Figure: Packages are usually archived weeks after a release.</strong></figcaption>
 </figure>
 </div>
 </div>
@@ -766,7 +767,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/r-versions3-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages tend to be archived right before a release or after it but not in the middle of releases.</strong></figcaption>
+<figcaption><strong>Figure: Packages tend to be archived right before a release or after it but not in the middle of releases.</strong></figcaption>
 </figure>
 </div>
 </div>
@@ -777,7 +778,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/r- version4-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Trend by year of packcages being archived.</strong> The closer to the left the closer they are after a release, the more to the right the closer they are archived before a R-release.</figcaption>
+<figcaption><strong>Figure: Trend by year of packcages being archived.</strong> The closer to the left the closer they are after a release, the more to the right the closer they are archived before a R-release.</figcaption>
 </figure>
 </div>
 </div>
@@ -790,7 +791,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/aged-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Time since being accepted to being archived.</strong> Most packages are archived soon after being accepted</figcaption>
+<figcaption><strong>Figure: Time since being accepted to being archived.</strong> Most packages are archived soon after being accepted</figcaption>
 </figure>
 </div>
 </div>
@@ -798,7 +799,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/aged-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Time since being accepted to being archived.</strong> Most packages are archived soon after being accepted</figcaption>
+<figcaption><strong>Figure: Time since being accepted to being archived.</strong> Most packages are archived soon after being accepted</figcaption>
 </figure>
 </div>
 </div>
@@ -808,7 +809,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/aged-public-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Time since last version till the package is archived.</strong> Most packages are archived shortly after a release, which might indicate that problems are only found after being accepted via additional checks not available to maintainers.</figcaption>
+<figcaption><strong>Figure: Time since last version till the package is archived.</strong> Most packages are archived shortly after a release, which might indicate that problems are only found after being accepted via additional checks not available to maintainers.</figcaption>
 </figure>
 </div>
 </div>
@@ -818,7 +819,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/aged-public1-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Age of packages being archived.</strong> Older packages are increasingly being archived but not at the same rate time passes.</figcaption>
+<figcaption><strong>Figure: Age of packages being archived.</strong> Older packages are increasingly being archived but not at the same rate time passes.</figcaption>
 </figure>
 </div>
 </div>
@@ -828,7 +829,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/aged-public2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Time since previous releases of packages being archived.</strong> Almost a constant rate except on a a specific moments.</figcaption>
+<figcaption><strong>Figure: Time since previous releases of packages being archived.</strong> Almost a constant rate except on a a specific moments.</figcaption>
 </figure>
 </div>
 </div>
@@ -841,7 +842,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="cell">
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
-<caption><strong>Dependencies impact</strong> Most packages archived result in another package archived.</caption>
+<caption><strong>Table: Dependencies impact</strong>. Most packages archived result in another package archived.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: center;">Affected packages</th>
@@ -851,27 +852,27 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">438</td>
+<td style="text-align: center;">439</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
-<td style="text-align: center;">145</td>
+<td style="text-align: center;">147</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">3</td>
-<td style="text-align: center;">81</td>
+<td style="text-align: center;">80</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">4</td>
-<td style="text-align: center;">42</td>
+<td style="text-align: center;">43</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">5</td>
-<td style="text-align: center;">33</td>
+<td style="text-align: center;">34</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">6</td>
-<td style="text-align: center;">24</td>
+<td style="text-align: center;">22</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">7</td>
@@ -879,11 +880,11 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 </tr>
 <tr class="even">
 <td style="text-align: center;">8</td>
-<td style="text-align: center;">3</td>
+<td style="text-align: center;">1</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">9</td>
-<td style="text-align: center;">2</td>
+<td style="text-align: center;">4</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">11</td>
@@ -919,7 +920,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/depending-on2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Archived packages due to a dependency often come back.</strong> In absolute numbers (left) and in percentage (right). Many packages that are archived result in another package being archived, which are usually back to CRAN.</figcaption>
+<figcaption><strong>Figure: Archived packages due to a dependency often come back.</strong> In absolute numbers (left) and in percentage (right). Many packages that are archived result in another package being archived, which are usually back to CRAN.</figcaption>
 </figure>
 </div>
 </div>
@@ -936,7 +937,7 @@ Table&nbsp;1: <strong>Tally of reasons of packages not fixed</strong>. Many pack
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/maintainers-emails-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Packages with not responsive maintainer address are archived later after the last version.</strong> The line indicates the aproximation of these two variables.</figcaption>
+<figcaption><strong>Figure: Packages with not responsive maintainer address are archived later after the last version.</strong> The line indicates the aproximation of these two variables.</figcaption>
 </figure>
 </div>
 </div>
@@ -957,7 +958,7 @@ Revilla, Lluís. 2022. <span>“Reasons Why Packages Are Archived on <span>CRAN<
 </div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>Data sources used are <code>tools:::CRAN_current_db()</code>, <code>tools:::CRAN_archive_db()</code>, and <a href="https://cran.r-project.org/src/contrib/PACKAGES.in">PACKAGES.in</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Data sources used are <code>tools:::CRAN_current_db()</code>, <code>tools:::CRAN_archive_db()</code>, and <a href="https://cran.r-project.org/src/contrib/PACKAGES.in">PACKAGES.in</a>. The first holds a data frame of packages currently on CRAN, which information on the package name, the package version, and the publishing timestamp. The second holds a list of data frames, each comprising the same package information for all versions ever published on CRAN, except the currently available version. The third, holds information on events for packages that have ever been archived, removed, orphaned, etc.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
