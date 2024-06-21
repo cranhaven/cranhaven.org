@@ -14,6 +14,30 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r package-dependencies, echo = FALSE}
+## Install package dependencies, if missing
+if (!requireNamespace("cransays")) remotes::install_github("r-hub/cransays")
+pkgs <- c("dplyr", "tidyr", "scales", "ggplot2", "patchwork", "lubridate", "forcats")
+pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
+lapply(pkgs, FUN = install.packages, character.only = TRUE)
+```
+
+CRAN packages are archived all the time, but a large portion of them
+eventually gets fixed and return to CRAN.  Using public data available
+from different resources[^1] on CRAN, we have found that 36% of the
+archived packages get unarchived at some point [@revilla_2022]. The
+median time for these packages to return to CRAN is ~33 days.
+
+[^1]: Data sources used are `tools:::CRAN_current_db()`,
+`tools:::CRAN_archive_db()`, and [PACKAGES.in]. The first holds a data
+frame of packages currently on CRAN, which information on the package
+name, the package version, and the publishing timestamp.  The second
+holds a list of data frames, each comprising the same package
+information for all versions ever published on CRAN, except the
+currently available version.  The third, holds information on events
+for packages that have ever been archived, removed, orphaned, etc.
+
+[PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
 
 ```{r cran-history, echo = FALSE}
 # Searches packages in PACKAGES.in file and extracts relevant information.
@@ -68,7 +92,8 @@ history_df <- cbind(history_df,
   mutate(action = tolower(action))
 history_df$action[grep("Back on CRAN", history_df$comment, ignore.case = TRUE)] <- "unarchived"
 
-full_history <- rbind(comments_df, history_df) |> 
+full_history <- rbind(comments_df, history_df) |>
+  ## Manually fix typos
   mutate(action = gsub(pattern = "e$", replacement = "ed", action)) |> 
   arrange(package) |>
   relocate(date) |>
@@ -114,23 +139,16 @@ pkg_history <- merge(packages, history, all = TRUE, sort = FALSE) |>
   arrange(package, date) 
 ```
 
-CRAN packages are archived all the time, but a large portion of them
-eventually gets fixed and return to CRAN.  Using public data available
-from different resources[^1] on CRAN, we have found that 36% of the
-archived packages get unarchived at some point [@revilla_2022]. The
-median time for these packages to return to CRAN is ~33 days.
-
-[^1]: Data sources used are `tools:::CRAN_current_db()`,
-`tools:::CRAN_archive_db()`, and [PACKAGES.in].
-
-[PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
 
 ## Data quality checks
 
-First of all we will make some checks on the data to be sure of the conclusions and inferences based on it.
+To make sure our assumptions about the raw input data is valid, we
+will run some initial quality checks based on the data that are
+available as of `r format(Sys.Date(), format = "%F")`.
 
 ```{r over-unarchived, echo = FALSE}
-# Packages with problems with annotation about being archived or recording the submission
+# Packages with problems with annotation about being archived or recording
+# the submission
 over_unarchived <- pkg_history |> 
   summarise(.by = package,
             missing = sum(action == "unarchived") > sum(action == "archived")) |> 
@@ -138,16 +156,18 @@ over_unarchived <- pkg_history |>
   pull(package)
 ```
 
-There are `r length(over_unarchived)` packages unarchived more times than archived.
-This could be because several reasons:
+A package should never unarchived more times than it is
+archive. However, there are currently `r length(over_unarchived)`
+packages unarchived more times than archived. There could be several
+reasons for this:
 
- - one of the previous issues with package lead to its removal. 
- - the term used for annotating an event was different (Orphaned instead of archived).
+ - one of the previous issues with the package lead to its removal.
+ - the term used for annotating an event was different ('orphaned'
+   instead of 'archived').
 
-We also check what is the first record that CRAN has of a package. 
 
 ```{r start}
-#| fig-cap: "**First recorded action taken of a package.** Looking by date most 
+#| fig-cap: "**Figure: First recorded action taken of a package.** Looking by date most
 #|  packages' first action recorded is being added to CRAN. For some it isn't."
 # Packages not registered when they were first included
 pkg_history |> 
@@ -170,23 +190,35 @@ no_accepted <- pkg_history |>
   pull(package)
 ```
 
-If the first action recorded for a package is not its inclusion this can indicate some problems on the data that could lead to problems on the conclusions.
+We also check what the first recorded event packages have.  If the
+first action recorded for a package is not that it is 'accepted', this
+can indicate some problems on the data that could lead to problems on
+the conclusions.
 
-A special mention to the removed action: This action is usually reserved to copyright issues and it is normal that it is the first action in record for a package as previous records are removed too from CRAN (package source code). 
+A special mention of the 'removed' action: This action is usually
+reserved to copyright issues and it is normal that it is the first
+action in record for a package as previous records are removed too
+from CRAN (package source code).
 
-By contrast, it isn't expected that there is no record on CRAN of accepted packages, this could mean that a package was renamed or that it was removed. 
-This happens for `r length(no_accepted)` packages.
-
-Other possible explanations for this: Maintainers of the packages might have an exchange with the CRAN volunteers that lead to unarchiving the package without new accepted packages. 
-It could also show a missing entry in the CRAN archives.
+By contrast, we should not expected lack of records on CRAN of
+'accepted' packages. Based on the current data, this is the case for
+`r length(no_accepted)` packages. This could indicated that packages
+have been 'renamed' or 'removed'.  Another explanations could be that
+there was a dialogue between the package maintainers and the CRAN Team
+that lead to the package being 'unarchived' without new 'accepted'
+packages.  It could be because of a missing entry in the CRAN
+data.
 
 ```{r multiple-actions}
-#| tbl-cap: "**Events per package in the same date.** Most packages have just 
+#| tbl-cap: "**Table: Events per package in the same date.** Most packages have just 
 #|  one action per day. Unarchiving usually requires a new package's version 
 #|  accepted the same day."
-# Count dates that have multiple actions/events
-# AMR package is archived multiple times and new packages dates match with unarchived dates
-# ACEP package is archived and unarchived but there is no new entry for it
+# Count dates that have multiple actions/events.
+# Observations:
+# - The 'AMR' package is 'archived' multiple times and new packages dates
+#   match with 'unarchived' dates
+# - The 'ACEP' package is 'archived' and 'unarchived', but there is no new
+#   entry for it
 hfdd <- summarise(pkg_history, .by = c(package, date), multi = n_distinct(action))
 
 # Merge data with itself
@@ -220,13 +252,15 @@ no_muliples_actions <- multiple_actions |>
   nrow()
 ```
 
-In total there are `r no_muliples_actions` unarchived events that doesn't have the corresponding accepted package included event (on the same date). 
-This affects `r length(no_multiples_actions_pack)` packages out of `r n_distinct(pkg_history$package)` (`r percent(length(no_multiples_actions_pack)/n_distinct(pkg_history$package))`).
+In total there are `r no_muliples_actions` 'unarchived' events that do
+not have the corresponding 'accepted' package included event (on the
+same date).  Currently, this is the case for `r length(no_multiples_actions_pack)` packages out of `r n_distinct(pkg_history$package)` (`r percent(length(no_multiples_actions_pack)/n_distinct(pkg_history$package))`).
 
-On the contrary there are some events that are not expected to happen on the same day:
+On the contrary, there are some events that are not expected to happen
+on the same day:
 
 ```{r combined-actions}
-#| tbl-cap: "**Actions that happend on the same date in a given package.** Mostly a new acceptance lead to a package being unarchived. In some ocasions other actions."
+#| tbl-cap: "**Table: Actions that happend on the same date in a given package.** Mostly a new acceptance lead to a package being unarchived. In some occasions other actions."
 multiple_actions |> 
   filter(multi != 1) |> 
   group_by(package, date) |> 
@@ -240,8 +274,8 @@ multiple_actions |>
 ```
 
 
-Those with 3 different actions imply multiple revisions from the CRAN team the same day. 
-
+Those with three different actions imply that there has been multiple
+revisions from the CRAN Team on the same day.
 
 ```{r current}
 all_packages <- unique(c(current_packages, names(archive)))
@@ -276,13 +310,18 @@ tb <- as.data.frame(table(table(all_failing_qc))) |>
   pull(n)
 ```
 
-In total there are `r length(pkg_failing_qc)` different packages identified with problematic records/processing from `r n_distinct(pkg_history$pacakge)`. 
-Some of them were found that had at two or more different issues `r tb`.
-Depending on which issue they might be corrected to the best of our abilities or simply discarded depending on the issue and question we are trying to answer. 
+In total there are `r length(pkg_failing_qc)` different packages
+identified with problematic records/processing from `r
+n_distinct(pkg_history$package)`.  Out of these, `r tb` were found to
+have two or more different issues.  Depending on which issue, they
+might be corrected to the best of our abilities, or simply be
+discarded depending on the issue and question we are trying to answer.
+
 
 ## Analysis
 
-Now that we have looked into the data quality we can start trying to answer some questions:
+Now that we have looked into the data quality, we can start trying to
+answer some questions:
 
 ```{r history-back, echo = FALSE}
 library("tidyr")
@@ -317,9 +356,14 @@ times_unarchived <- pkg_history |>
 ```
 
 ```{r resubmissions-data}
-# download of 31Mb and long task of organizing it to discard most data.
-cdh <- cransays::download_history()
-library("lubridate", warn.conflicts	 = FALSE)
+if (file.exists("cdh.rds")) {
+  cdh <- readRDS("cdh.rds")
+} else {
+  # download of ~31MB and long task of organizing it to discard most data.
+  cdh <- cransays::download_history()
+}
+
+library("lubridate", warn.conflicts = FALSE)
 cran_submissions <- cdh |> 
   filter(package %in% pkg_history$package) |> 
   distinct(package, version, snapshot_time, submission_time) |> 
@@ -477,8 +521,8 @@ archived_all_versions <- archived_all |>
 ### Summary of how long it takes packages to be unarchived
 
 ```{r table-times}
-#| tbl-cap: "**Table with summary statistics of time to get back to CRAN after 
-#|  being archived.** Median time below 33 days."
+#| tbl-cap: "**Table: Summary statistics of time to get back to CRAN after
+#| being archived.** Median time is 33 days."
 fiu <- function(x){is(x, "difftime")}
 archived_all_versions |> 
   filter(!is.na(accepted),
@@ -500,8 +544,8 @@ archived_all_versions |>
 
 
 ```{r plot-times}
-#| fig-cap: "**summary statistics of time to get back to CRAN after being 
-#|  archived.** Same as the previous table but in graphical format."
+#| fig-cap: "**Figure: Summary statistics of time to get back to CRAN after
+#| being archived.** Graphical representation of the previous table."
 archived_all_versions |> 
   filter(!is.na(accepted), !package %in% all_failing_qc) |>
   ggplot() +
@@ -512,8 +556,8 @@ archived_all_versions |>
                                     labels = c(1, 7, 15, 30*1:5),
                                     name = "days")) +
   theme_minimal() +
-  labs(y = "Days till package is back on CRAN", 
-       x = "Times a package has been archived",
+  labs(y = "Number of days before package returned on CRAN", 
+       x = "Number of times a package has been archived",
        title = "Time per each ")
 ```
 
@@ -521,8 +565,8 @@ archived_all_versions |>
 ### Return time for packages archived only once in their lifetime
 
 ```{r plot-ecdf}
-#| fig-cap: "Empirical distribution of the time it takes packages to get
-#|  unarchived as a function of number of days since being archived on CRAN for the first time."
+#| fig-cap: "**Figure: Empirical distribution of the time it takes packages to get
+#|  unarchived as a function of number of days since being archived on CRAN for the first time.**"
 archived_all_versions |> 
   filter(time_archived == "1",
          !package %in% all_failing_qc) |>
@@ -533,18 +577,18 @@ archived_all_versions |>
                      sec.axis = dup_axis(name = element_blank())) +
   scale_x_continuous(breaks = c(0, 30*1:12)) +
   theme_minimal() +
-  labs(title = "Most packages are back to CRAN soon",
+  labs(title = "Most packages are back to CRAN within 33 days",
        subtitle = "Focusing in packages returning in less than a year",
        y = "Percentage of packages back on CRAN",
-       x = "Days till packages are back on CRAN") +
+       x = "Number of days until packages are back on CRAN") +
   theme(plot.title.position = "plot", axis.title.x = element_text(hjust = 0))
 ```
 
 ### Return time for packages archived
 
 ```{r plot-ecdf-all}
-#| fig-cap: "Empirical distribution of the time it takes packages to get
-#|  unarchived as a function of number of days since being archived on CRAN."
+#| fig-cap: "**Figure: Empirical distribution of the time it takes packages to get
+#|  unarchived as a function of number of days since being archived on CRAN.**"
 archived_all_versions |> 
   filter(!is.na(accepted),
          !package %in% all_failing_qc) |>
@@ -603,8 +647,8 @@ archived_all_versions |>
 
 
 ```{r return-time3}
-#| fig-cap: "**Packages archived and date since the previous release.** The 
-#|  color indicates if a given package was archived multiple times: the more 
+#| fig-cap: "**Figure: Packages archived and date since the previous release.** The 
+#|  color indicates if a given package was archived multiple times; the more 
 #|  times it has been archived the lighter the point is."
 archived_all_versions |> 
   filter(!is.na(time_since_previous), !package %in% all_failing_qc) |>
@@ -628,7 +672,7 @@ archived_all_versions |>
 ### Cumulative number of archived packages over the years
 
 ```{r plot-cumulative}
-#| fig-cap: "**Packages actions done by the CRAN Team over time**.
+#| fig-cap: "**Figure: Packages actions done by the CRAN Team over time**.
 #|  The CRAN Team may take different actions for packages currently on
 #|  e.g. archived (solid red), orphaned (dotted yellow), removed
 #|  (dashed green), renamed (dashed blue), and unarchived (dotted purple).
@@ -665,7 +709,7 @@ p_type + scale_y_continuous(expand = expansion()) +
 ### Days to return versus date when archived
 
 ```{r plot-events}
-#| fig-cap: "**Packages being archived and returning to CRAN.**
+#| fig-cap: "**Figure: Packages being archived and returning to CRAN.**
 #|    Each data point represents when a CRAN package was archived (horizontal
 #|    axis) and when it was unarchived (vertical axis).
 #|    If more than one package was archive and unarchived on the same dates,
@@ -694,7 +738,7 @@ archived_all_versions |>
 ### Distribution of number of days for packages to return to CRAN
 
 ```{r plot-distribution}
-#| fig-cap: "**Histogram of how long packages remain archived on CRAN**. 
+#| fig-cap: "**Figure: Histogram of how long packages remain archived on CRAN**. 
 #|  Each bar represents a week. Most packages return to CRAN within a month."
 p1 <- archived_all_versions |> 
   filter(!is.na(delay_accepted)) |> 
@@ -732,7 +776,7 @@ From the total of `r length(archive)` in its whole history.
 Which results in  `r scales::percent(n_distinct(pkg_history$package[pkg_history$action == "archived"])/length(archive))` of all packages ever in CRAN got at one point archived.
 
 ```{r packages-archived}
-#| fig-cap: "**Packages are archived multiple times**.
+#| fig-cap: "**Figure: Packages are archived multiple times**.
 #|  Packages archived are sometimes back on CRAN and archived again."
 library("forcats")
 pa_histo <- archived_all_versions |> 
@@ -784,7 +828,7 @@ Most packages are not archived, but if they are mostly archived once.
 This is probably because 50% of those archived never get back to CRAN.
 
 ```{r packages-archived-unarchived}
-#| fig-cap: "**Most packages are not back to CRAN after being archived**.
+#| fig-cap: "**Figure: Most packages are not back to CRAN after being archived**.
 #|  Packages that got archived sometimes go back on CRAN."
 pa <- archived_all_versions |> 
   filter(!package %in% all_failing_qc) |>
@@ -823,7 +867,7 @@ Approximately `r percent(pa_percentage)` packages gets back on CRAN.
 ### Packages resubmission 
 
 ```{r archived-type}
-#| fig-cap: "**Resubmission process by date of being archived.** Events in black
+#| fig-cap: "**Figure: Resubmission process by date of being archived.** Events in black
 #|  are those we cannot say if they were not re-submitted or rejected."
 
 rver2 <- rver |> 
@@ -864,7 +908,7 @@ Notice how there are some packages that submitted a new version to CRAN after `r
 Those maintainers might need help to get their packages back on CRAN.
 
 ```{r archived2resubmit}
-#| fig-cap: "**Submissions are slightly faster for those that are accepted.** Percentage of packages that are submitted before a given time."
+#| fig-cap: "**Figure: Submissions are slightly faster for those that are accepted.** Percentage of packages that are submitted before a given time."
 resubm_t <- archived_all_versions |> 
   filter(!is.na(delay_submission)) |> 
   ggplot() +
@@ -922,7 +966,7 @@ Those that try almost all of them eventually get back to CRAN.
 But how fast is the process of being back on CRAN?
 
 ```{r speed-resubmission}
-#| fig-cap: "**Resubmission delay: % spend in review after submitting a new version till it is accepted.** Only includes packages that were accepted one day later than submitted (to avoid dividing by 0)"
+#| fig-cap: "**Figure: Resubmission delay: % spend in review after submitting a new version till it is accepted.** Only includes packages that were accepted one day later than submitted (to avoid dividing by 0)"
 subm_rel <- archived_all_versions |> 
   filter(!is.na(initial_resubmission) & !is.na(accepted),
          delay_acceptance > 0) |> 
@@ -969,7 +1013,7 @@ Most of them where archived once but some of them (`r multiple_archived`) were a
 
 
 ```{r failed-check-archived}
-#| fig-cap: "**Packages archived because problems were not fixed on time are mostly back.**.
+#| fig-cap: "**Figure: Packages archived because problems were not fixed on time are mostly back.**.
 #|  Packages that got archived because maintainers couldn't fix the packages on time got back on time"
 
 archived_all_versions |> 
@@ -992,7 +1036,7 @@ archived_all_versions |>
 
 
 ```{r tbl-not-fixed}
-#| tbl-cap: "**Tally of reasons of packages not fixed**. Many packages are not 
+#| tbl-cap: "**Table: Tally of reasons of packages not fixed**. Many packages are not 
 #|  fixed and the maintainer address."
 archived_all_versions |> 
   filter(!is.na(not_fixed) & !requested) |>
@@ -1009,7 +1053,7 @@ The fifth most common reason is that the email address of the maintainer fails t
 #### Linked to R-releases?
 
 ```{r r-versions}
-#| fig-cap: "**More packages are archived the closer the release date is.**"
+#| fig-cap: "**Figure: More packages are archived the closer the release date is.**"
 archived_all_versions |> 
   ggplot() +
   geom_histogram(aes(abs(time_before_next), fill = back_on_cran), 
@@ -1030,7 +1074,7 @@ archived_all_versions |>
 
 
 ```{r r-versions2}
-#| fig-cap: "**Packages are usually archived weeks after a release.**"
+#| fig-cap: "**Figure: Packages are usually archived weeks after a release.**"
 archived_all_versions |> 
   ggplot() +
   geom_histogram(aes(time_since_rel, fill = back_on_cran), col = "lightgray", bins = 52) +
@@ -1048,7 +1092,7 @@ archived_all_versions |>
 ```
 
 ```{r r-versions3}
-#| fig-cap: "**Packages tend to be archived right before a release or after it but not in the middle of releases.**"
+#| fig-cap: "**Figure: Packages tend to be archived right before a release or after it but not in the middle of releases.**"
 ggplot(archived_all_versions) +
   geom_histogram(aes(time_before_next + time_since_rel, fill = back_on_cran), 
                  col = "lightgray", binwidth = 4) +
@@ -1068,7 +1112,7 @@ ggplot(archived_all_versions) +
 Only in 2022 and 2023 there has been a clear trend for packages that are archived closer to next release and after release respectively:
 
 ```{r r- version4}
-#| fig-cap: "**Trend by year of packcages being archived.** The closer to the left the closer they are after a release, the more to the right the closer they are archived before a R-release."
+#| fig-cap: "**Figure: Trend by year of packcages being archived.** The closer to the left the closer they are after a release, the more to the right the closer they are archived before a R-release."
 ggplot(archived_all_versions) +
   geom_histogram(aes(time_before_next + time_since_rel), 
                  binwidth = 4) +
@@ -1089,7 +1133,7 @@ ggplot(archived_all_versions) +
 #### Age of archival
 
 ```{r aged}
-#| fig-cap: "**Time since being accepted to being archived.** Most packages are 
+#| fig-cap: "**Figure: Time since being accepted to being archived.** Most packages are 
 #|  archived soon after being accepted"
 # Some are simply impossible:
 # time_since_first shouldn't be negative. DirichletReg, CDS, AgroR: the archives are missing versions
@@ -1128,7 +1172,7 @@ p_archived +
 
 
 ```{r aged-public}
-#| fig-cap: "**Time since last version till the package is archived.** Most 
+#| fig-cap: "**Figure: Time since last version till the package is archived.** Most 
 #|  packages are archived shortly after a release, which might indicate that 
 #|  problems are only found after being accepted via additional checks not 
 #|  available to maintainers."
@@ -1153,7 +1197,7 @@ tsp +
 
 
 ```{r aged-public1}
-#| fig-cap: "**Age of packages being archived.** Older packages are increasingly being 
+#| fig-cap: "**Figure: Age of packages being archived.** Older packages are increasingly being 
 #|  archived but not at the same rate time passes."
 archived_all_versions |> 
   filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
@@ -1172,7 +1216,7 @@ archived_all_versions |>
 
 
 ```{r aged-public2}
-#| fig-cap: "**Time since previous releases of packages being archived.** Almost
+#| fig-cap: "**Figure: Time since previous releases of packages being archived.** Almost
 #|  a constant rate except on a a specific moments."
 archived_all_versions |> 
   filter(!package %in% c(impossible_dates, pkg_failing_qc)) |> 
@@ -1199,7 +1243,7 @@ This often results in people stepping up and fixing the package.
 When this doesn't happen, packages will be archived together with their dependency.
 
 ```{r depending-on}
-#| tbl-cap: "**Dependencies impact** Most packages archived result in another package archived."
+#| tbl-cap: "**Table: Dependencies impact**. Most packages archived result in another package archived."
 count_deps <- archived_all_versions |> 
   filter(!is.na(dp)) |> 
   count(dp, back_on_cran, sort = TRUE) |> 
@@ -1216,7 +1260,7 @@ count_deps |>
 The packages that affected more packages lead to 18 packages archived.
 
 ```{r depending-on2}
-#| fig-cap: "**Archived packages due to a dependency often come back.** In 
+#| fig-cap: "**Figure: Archived packages due to a dependency often come back.** In 
 #|  absolute numbers (left) and in percentage (right). Many packages that are 
 #|  archived result in another package being archived, which are usually back to
 #|  CRAN."
@@ -1255,8 +1299,8 @@ Those packages that were archived were mostly back on CRAN.
 Sometimes the problem is with maintainer's email.
 
 ```{r maintainers-emails}
-#| fig-cap: "**Packages with not responsive maintainer address are archived 
-#|  later after the last version.** The line indicates the aproximation of these two variables."
+#| fig-cap: "**Figure: Packages with not responsive maintainer address are archived 
+#|  later after the last version.** The line indicates the approximation of these two variables."
 archived_all_versions |> 
   filter(maintainer_address) |> 
   ggplot(aes(archived, time_since_previous)) +
@@ -1270,7 +1314,7 @@ archived_all_versions |>
   theme_minimal() +
   labs(x = "Date package was archived",
        y = "Time since previous version (weeks)",
-       size = "Evenets",
+       size = "Number of events",
        title = "Maintainers keep their emails")
 ```
 
