@@ -1314,7 +1314,7 @@ archived_all_versions |>
   theme_minimal() +
   labs(x = "Date package was archived",
        y = "Time since previous version (weeks)",
-       size = "Number of events",
+       size = "Events",
        title = "Maintainers keep their emails")
 ```
 
