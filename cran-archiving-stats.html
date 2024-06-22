@@ -204,7 +204,7 @@ div.csl-indent {
 <p>CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on CRAN, we have found that 36% of the archived packages get unarchived at some point <span class="citation" data-cites="revilla_2022">(<a href="#ref-revilla_2022" role="doc-biblioref">Revilla 2022</a>)</span>. The median time for these packages to return to CRAN is ~33 days.</p>
 <section id="data-quality-checks" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality-checks">Data quality checks</h2>
-<p>To make sure our assumptions about the raw input data is valid, we will run some initial quality checks based on the data that are available as of 2024-06-21.</p>
+<p>To make sure our assumptions about the raw input data is valid, we will run some initial quality checks based on the data that are available as of 2024-06-22.</p>
 <p>A package should never unarchived more times than it is archive. However, there are currently 96 packages unarchived more times than archived. There could be several reasons for this:</p>
 <ul>
 <li>one of the previous issues with the package lead to its removal.</li>
@@ -258,12 +258,12 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">59810</td>
+<td style="text-align: center;">59814</td>
 <td style="text-align: center;">86%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
-<td style="text-align: center;">9067</td>
+<td style="text-align: center;">9073</td>
 <td style="text-align: center;">13%</td>
 </tr>
 <tr class="odd">
@@ -291,18 +291,18 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">accepted &amp; unarchived</td>
-<td style="text-align: center;">4327</td>
-<td style="text-align: center;">93.436%</td>
+<td style="text-align: center;">4330</td>
+<td style="text-align: center;">93.440%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">accepted &amp; orphaned</td>
 <td style="text-align: center;">121</td>
-<td style="text-align: center;">2.613%</td>
+<td style="text-align: center;">2.611%</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">accepted &amp; archived &amp; unarchived</td>
 <td style="text-align: center;">109</td>
-<td style="text-align: center;">2.354%</td>
+<td style="text-align: center;">2.352%</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">accepted &amp; archived</td>
@@ -329,7 +329,7 @@ div.csl-indent {
 </div>
 </div>
 <p>Those with three different actions imply that there has been multiple revisions from the CRAN Team on the same day.</p>
-<p>In total there are 621 different packages identified with problematic records/processing from <code>r n_distinct(pkg_history$package)</code>. Out of these, 118 were found to have two or more different issues. Depending on which issue, they might be corrected to the best of our abilities, or simply be discarded depending on the issue and question we are trying to answer.</p>
+<p>In total there are 621 different packages identified with problematic records/processing from 9260. Out of these, 118 were found to have two or more different issues. Depending on which issue, they might be corrected to the best of our abilities, or simply be discarded depending on the issue and question we are trying to answer.</p>
 </section>
 <section id="analysis" class="level2">
 <h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
@@ -365,7 +365,7 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">1</td>
-<td style="text-align: center;">3351</td>
+<td style="text-align: center;">3352</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">9 days</td>
 <td style="text-align: center;">33 days</td>
@@ -375,7 +375,7 @@ div.csl-indent {
 </tr>
 <tr class="even">
 <td style="text-align: center;">2</td>
-<td style="text-align: center;">660</td>
+<td style="text-align: center;">661</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">8 days</td>
 <td style="text-align: center;">28 days</td>
@@ -395,12 +395,12 @@ div.csl-indent {
 </tr>
 <tr class="even">
 <td style="text-align: center;">4</td>
-<td style="text-align: center;">57</td>
+<td style="text-align: center;">58</td>
 <td style="text-align: center;">1 days</td>
 <td style="text-align: center;">5 days</td>
-<td style="text-align: center;">17 days</td>
-<td style="text-align: center;">71 days</td>
-<td style="text-align: center;">67 days</td>
+<td style="text-align: center;">18 days</td>
+<td style="text-align: center;">70 days</td>
+<td style="text-align: center;">66 days</td>
 <td style="text-align: center;">652 days</td>
 </tr>
 <tr class="odd">
@@ -525,7 +525,7 @@ div.csl-indent {
 </section>
 <section id="packages-archived-over-all" class="level3">
 <h3 class="anchored" data-anchor-id="packages-archived-over-all">Packages archived over all</h3>
-<p>There have been at least 9065 packages archived from CRAN. From the total of 22988 in its whole history. Which results in 39% of all packages ever in CRAN got at one point archived.</p>
+<p>There have been at least 9065 packages archived from CRAN. From the total of 22991 in its whole history. Which results in 39% of all packages ever in CRAN got at one point archived.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -590,20 +590,20 @@ div.csl-indent {
 <tbody>
 <tr class="odd">
 <td style="text-align: center;">Never resubmitted</td>
-<td style="text-align: center;">2547</td>
-<td style="text-align: center;">48.709%</td>
+<td style="text-align: center;">2546</td>
+<td style="text-align: center;">48.671%</td>
 <td style="text-align: center;">NA</td>
 </tr>
 <tr class="even">
 <td style="text-align: center;">Accepted</td>
-<td style="text-align: center;">2542</td>
-<td style="text-align: center;">48.614%</td>
+<td style="text-align: center;">2545</td>
+<td style="text-align: center;">48.652%</td>
 <td style="text-align: center;">95%</td>
 </tr>
 <tr class="odd">
 <td style="text-align: center;">Not fit</td>
 <td style="text-align: center;">140</td>
-<td style="text-align: center;">2.677%</td>
+<td style="text-align: center;">2.676%</td>
 <td style="text-align: center;">5%</td>
 </tr>
 </tbody>
@@ -625,7 +625,7 @@ div.csl-indent {
 <p>Most packages that get back to CRAN are accepted soon after submitting the new version fixing the problems of being archived. But some (~ 21%) spend most of the time trying to pass checks to comply with CRAN policies: maybe trying to fix issues detected on submission or waiting for CRAN maintainers feedback.</p>
 <section id="packages-not-addressed-in-time" class="level3">
 <h3 class="anchored" data-anchor-id="packages-not-addressed-in-time">Packages not addressed in time</h3>
-<p>Packages are archived because they are not addressed/corrected in time. If we look in more detail on this packages we see there are 5143 packages that failed to correct in time. Most of them where archived once but some of them (1001) were archived multiple times.</p>
+<p>Packages are archived because they are not addressed/corrected in time. If we look in more detail on this packages we see there are 5143 packages that failed to correct in time. Most of them where archived once but some of them (1003) were archived multiple times.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -937,7 +937,7 @@ Table&nbsp;1: <strong>Table: Tally of reasons of packages not fixed</strong>. Ma
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="cran-archiving-stats_files/figure-html/maintainers-emails-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption><strong>Figure: Packages with not responsive maintainer address are archived later after the last version.</strong> The line indicates the aproximation of these two variables.</figcaption>
+<figcaption><strong>Figure: Packages with not responsive maintainer address are archived later after the last version.</strong> The line indicates the approximation of these two variables.</figcaption>
 </figure>
 </div>
 </div>
