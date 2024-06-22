@@ -42,7 +42,7 @@ jobs:
           pkgs <- unique(pkgs)
           pkgs <- pkgs[!sapply(pkgs, FUN = requireNamespace)]
           install.packages(pkgs)
-          remotes::install_github("r-hub/cransays")
+          ## remotes::install_github("r-hub/cransays")
         shell: Rscript {0}
 
       - name: Session information
