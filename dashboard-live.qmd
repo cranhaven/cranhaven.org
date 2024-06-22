@@ -17,7 +17,17 @@ knitr::opts_chunk$set(
   message = FALSE,
   echo = FALSE
 )
+```
 
+```{r package-dependencies, include = FALSE}
+## Install package dependencies, if missing
+pkgs <- c("ciw", "dplyr", "DT", "jsonlite")
+pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
+lapply(pkgs, FUN = install.packages, character.only = TRUE)
+```
+
+
+```{r params, include = FALSE}
 max_days <- 5*7
 ```
 

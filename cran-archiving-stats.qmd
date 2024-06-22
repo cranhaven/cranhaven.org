@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r package-dependencies, echo = FALSE}
+```{r package-dependencies, include = FALSE}
 ## Install package dependencies, if missing
 pkgs <- c("dplyr", "tidyr", "ggplot2", "patchwork", "lubridate", "forcats")
 pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
