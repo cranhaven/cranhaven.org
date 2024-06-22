@@ -16,7 +16,10 @@ knitr::opts_chunk$set(
 
 ```{r package-dependencies, echo = FALSE}
 ## Install package dependencies, if missing
-if (!requireNamespace("cransays")) remotes::install_github("r-hub/cransays")
+if (!requireNamespace("cransays")) {
+  if (!requireNamespace("remotes")) install.packages("remotes")
+  remotes::install_github("r-hub/cransays")
+}
 pkgs <- c("dplyr", "tidyr", "scales", "ggplot2", "patchwork", "lubridate", "forcats")
 pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
 lapply(pkgs, FUN = install.packages, character.only = TRUE)
@@ -252,9 +255,7 @@ no_muliples_actions <- multiple_actions |>
   nrow()
 ```
 
-In total there are `r no_muliples_actions` 'unarchived' events that do
-not have the corresponding 'accepted' package included event (on the
-same date).  Currently, this is the case for `r length(no_multiples_actions_pack)` packages out of `r n_distinct(pkg_history$package)` (`r percent(length(no_multiples_actions_pack)/n_distinct(pkg_history$package))`).
+In total there are `r no_muliples_actions` 'unarchived' events that do not have the corresponding 'accepted' package included event (on the same date).  Currently, this is the case for `r length(no_multiples_actions_pack)` packages out of `r n_distinct(pkg_history$package)` (`r percent(length(no_multiples_actions_pack)/n_distinct(pkg_history$package))`).
 
 On the contrary, there are some events that are not expected to happen
 on the same day:
@@ -311,11 +312,7 @@ tb <- as.data.frame(table(table(all_failing_qc))) |>
 ```
 
 In total there are `r length(pkg_failing_qc)` different packages
-identified with problematic records/processing from `r
-n_distinct(pkg_history$package)`.  Out of these, `r tb` were found to
-have two or more different issues.  Depending on which issue, they
-might be corrected to the best of our abilities, or simply be
-discarded depending on the issue and question we are trying to answer.
+identified with problematic records/processing from `r n_distinct(pkg_history$package)`.  Out of these, `r tb` were found to have two or more different issues.  Depending on which issue, they might be corrected to the best of our abilities, or simply be discarded depending on the issue and question we are trying to answer.
 
 
 ## Analysis
