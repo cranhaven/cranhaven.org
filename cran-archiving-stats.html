@@ -198,9 +198,6 @@ div.csl-indent {
 </header>
 
 
-<div class="cell">
-<pre><code>#&gt; list()</code></pre>
-</div>
 <p>CRAN packages are archived all the time, but a large portion of them eventually gets fixed and return to CRAN. Using public data available from different resources<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> on CRAN, we have found that 36% of the archived packages get unarchived at some point <span class="citation" data-cites="revilla_2022">(<a href="#ref-revilla_2022" role="doc-biblioref">Revilla 2022</a>)</span>. The median time for these packages to return to CRAN is ~33 days.</p>
 <section id="data-quality-checks" class="level2">
 <h2 class="anchored" data-anchor-id="data-quality-checks">Data quality checks</h2>
@@ -1042,7 +1039,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("https:\/\/www\.cranhaven\.org");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
