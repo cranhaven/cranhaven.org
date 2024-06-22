@@ -16,8 +16,7 @@ The **CRANhaven** package repository hosts [R packages that were
 recently archived on CRAN]. Those packages can be installed using:
 
 ```r
-options(repos = c(getOption("repos"), "https://cranhaven.r-universe.dev"))
-install.packages("pkgname")
+install.packages("pkgname", repos = c("https://cranhaven.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
 Packages remain on CRANhaven[^1] for up to five weeks[^2], or until

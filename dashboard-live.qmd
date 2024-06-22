@@ -200,8 +200,7 @@ removed[^2] from CRAN during the last `r max_days` days.  These
 packages can be installed using:
 
 ```r
-options(repos = c(getOption("repos"), "https://cranhaven.r-universe.dev"))
-install.packages("pkgname")
+install.packages("pkgname", repos = c("https://cranhaven.r-universe.dev", "https://cloud.r-project.org"))
 ```
 
 The table shows the date when a package was dropped by CRAN and their
