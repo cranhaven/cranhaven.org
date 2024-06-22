@@ -38,9 +38,11 @@ jobs:
           
       - name: Install R dependencies
         run: |
-          pkgs <- c("ciw", "dplyr", "DT", "ggplot2", "patchwork", "tidyr", "knitr")
+          pkgs <- c("ciw", "dplyr", "DT", "ggplot2", "patchwork", "tidyr", "knitr", "lubridate", "forecats", "remotes")
+          pkgs <- unique(pkgs)
           pkgs <- pkgs[!sapply(pkgs, FUN = requireNamespace)]
           install.packages(pkgs)
+          remotes::install_github("r-hub/cransays")
         shell: Rscript {0}
 
       - name: Session information

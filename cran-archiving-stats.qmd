@@ -16,13 +16,13 @@ knitr::opts_chunk$set(
 
 ```{r package-dependencies, echo = FALSE}
 ## Install package dependencies, if missing
+pkgs <- c("dplyr", "tidyr", "ggplot2", "patchwork", "lubridate", "forcats")
+pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
+lapply(pkgs, FUN = install.packages, character.only = TRUE)
 if (!requireNamespace("cransays")) {
   if (!requireNamespace("remotes")) install.packages("remotes")
   remotes::install_github("r-hub/cransays")
 }
-pkgs <- c("dplyr", "tidyr", "scales", "ggplot2", "patchwork", "lubridate", "forcats")
-pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
-lapply(pkgs, FUN = install.packages, character.only = TRUE)
 ```
 
 CRAN packages are archived all the time, but a large portion of them
