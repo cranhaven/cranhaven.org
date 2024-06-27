@@ -77,6 +77,20 @@
     "text": "Footnotes\n\n\nData sources used are tools:::CRAN_current_db(), tools:::CRAN_archive_db(), and PACKAGES.in. The first holds a data frame of packages currently on CRAN, which information on the package name, the package version, and the publishing timestamp. The second holds a list of data frames, each comprising the same package information for all versions ever published on CRAN, except the currently available version. The third, holds information on events for packages that have ever been archived, removed, orphaned, etc.↩︎"
   },
   {
+    "objectID": "dashboard-at-risk.html",
+    "href": "dashboard-at-risk.html",
+    "title": "Dashboard: Packages At-Risk of Being Archived",
+    "section": "",
+    "text": "The below table lists 110 R packages that are at risk of being archived1 on CRAN, because they have outstanding unresolved issues."
+  },
+  {
+    "objectID": "dashboard-at-risk.html#footnotes",
+    "href": "dashboard-at-risk.html#footnotes",
+    "title": "Dashboard: Packages At-Risk of Being Archived",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎"
+  },
+  {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
