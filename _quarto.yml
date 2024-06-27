@@ -9,8 +9,10 @@ website:
         text: Home
       - text: Articles
         menu:
-          - text: "Live Dashboard: Recently Archived CRAN Packages"
+          - text: "Dashboard: Recently Archived CRAN Packages"
             href: dashboard-live.qmd
+          - text: "Dashboard: Packages At-Risk of Being Archived"
+            href: dashboard-at-risk.qmd
           - text: "Study: Many Archived Packages Return to CRAN"
             href: cran-archiving-stats.html
       - about.qmd

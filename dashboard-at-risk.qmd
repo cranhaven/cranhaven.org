@@ -1,0 +1,108 @@
+---
+title: "Dashboard: Packages At-Risk of Being Archived"
+
+execute:
+  freeze: false
+---
+
+<style>
+tr { vertical-align: top; }
+</style>
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  echo = FALSE
+)
+```
+
+```{r package-dependencies, include = FALSE}
+## Install package dependencies, if missing
+pkgs <- c("ciw", "dplyr", "DT", "jsonlite")
+pkgs <- pkgs[!vapply(pkgs, FUN = requireNamespace, FUN.VALUE = FALSE)]
+lapply(pkgs, FUN = install.packages, character.only = TRUE)
+```
+
+
+```{r dashboard}
+packages_at_risk <- local({
+  data <- NULL
+  function() {
+    if (!is.null(data)) return(data)
+    db <- tools::CRAN_package_db()
+    db <- subset(db, !is.na(Deadline))
+    db <- db[, c("Deadline", "Package", "Version", "Published", "Maintainer", "BugReports", "URL", "Reverse depends", "Reverse imports", "Reverse linking to")]
+    db$Deadline <- as.Date(db$Deadline)
+    db$Published <- as.Date(db$Published)
+    db <- db[order(db$Deadline), ]
+    rownames(db) <- NULL
+    revdeps <- paste(db[["Reverse depends"]], db[["Reverse imports"]], db[["Reverse linking to"]], sep = ", ")
+    revdeps <- strsplit(revdeps, split = ",", fixed = TRUE)
+    revdeps <- lapply(revdeps, function(x) {
+      x <- gsub(" ", "", x)
+      x <- gsub("NA", "", x)
+      x <- x[nzchar(x)]
+      x <- sort(unique(x))
+      paste(x, collapse = ", ")
+    })
+    revdeps <- unlist(revdeps)
+    db[["Reverse Packages"]] <- revdeps
+    db <- db[, c("Deadline", "Package", "Version", "Published", "Maintainer", "BugReports", "URL", "Reverse Packages")]
+    data <<- db
+    data
+  }
+})
+
+atrisk <- packages_at_risk()
+days <- atrisk$Deadline - Sys.Date()
+days <- ifelse(days == -1, "1 day overdue", ifelse(days < 0, sprintf("%s days overdue", abs(days)), ifelse(days == 0, "today", ifelse(days == 1, "in 1 day", sprintf("in %s days", days)))))
+atrisk$Deadline <- sprintf("%s<br><small>(%s)</small>", atrisk$Deadline, days)
+atrisk$Version <- sprintf("%s<br><small>(%s)<small>", atrisk$Version, atrisk$Published)
+atrisk$Published <- NULL
+atrisk$Maintainer <- sub("^([^<]+)<([^ ]+)>.*$", '<a href="mailto:\\2">\\1</a>', atrisk$Maintainer)
+atrisk$Maintainer <- sub(" +<", "<", atrisk$Maintainer)
+atrisk$Maintainer <- sub("@", "-at-", atrisk$Maintainer)
+atrisk$Links <- sprintf('<a href="https://cran.r-project.org/web/checks/check_results_%s.html">checks</a>', atrisk$Package)
+atrisk$Links <- sprintf('%s<br><a href="%s">url</a>', atrisk$Links, atrisk$URL)
+atrisk$Links <- sprintf('%s<br><a href="%s">url2</a>', atrisk$Links, atrisk$BugReports)
+atrisk$Links <- gsub('<br><a href="NA">url</a>', "", atrisk$Links)
+atrisk$URL <- NULL
+atrisk$BugReports <- NULL
+revdeps <- atrisk[["Reverse Packages"]]
+nrevdeps <- lengths(strsplit(revdeps, split = ",", fixed = TRUE))
+nrevdeps[revdeps == ""] <- 0L
+atrisk[["Reverse Packages"]] <- ifelse(nrevdeps == 0, "", sprintf("[n=%d] %s", nrevdeps, revdeps))
+atrisk$Package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', atrisk$Package, atrisk$Package)
+colnames(atrisk) <- tolower(colnames(atrisk))
+
+atrisk <- atrisk[, c("deadline", "package", "version", "maintainer", "links", "reverse packages")]
+```
+
+The below table lists `r nrow(atrisk)` R packages that are at risk of being archived[^1] on CRAN, because they have outstanding unresolved issues.
+
+[^1]: When a package is _archived_, the archived version is still
+available in the [CRAN archive area] together with all previous
+versions.
+
+
+```{r}
+# Show only recent packages
+library("DT")
+datatable(atrisk,
+  rownames = FALSE,
+  escape = FALSE,
+  elementId = "live-dashboard",
+  options = list(
+    pageLength = 50,
+    order = list(list(0, "asc"), list(1, "asc"))
+  )
+)
+```
+
+[CRAN archive area]: https://cran.r-project.org/src/contrib/Archive/
+[CRAN mirror on R-universe]: https://cran.r-universe.dev/builds
+[CRAN Repository Policy]: https://cran.r-project.org/web/packages/policies.html
+[PACKAGES.in]: https://cran.r-project.org/src/contrib/PACKAGES.in
