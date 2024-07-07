@@ -5,9 +5,9 @@ subtitle: "A repository for recently archived CRAN packages"
 
 ::: {.callout-warning}
 
-This is work under development! Please do _not_ rely on it for
-production and do _not_ add CRANhaven to `Additional_repositories` of
-your package.
+Please, do _not_ add the CRANhaven repository to
+`Additional_repositories` of your package. It is _only_ meant to be a
+backup solution for end-users when a package falls of CRAN.
 
 :::
 
