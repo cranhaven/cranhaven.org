@@ -141,7 +141,7 @@ datatable(atrisk,
   elementId = "live-dashboard",
   options = list(
     pageLength = 50,
-    order = list(list(0, "asc"), list(1, "asc"))
+    order = list(list(0, "asc"), list(6, "desc"), list(1, "asc"))
   )
 )
 ```
