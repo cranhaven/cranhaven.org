@@ -80,25 +80,20 @@ incoming <- cran_incoming()
 ## show up as multiple entries in CRAN incoming, e.g.
 ## 1 MetaNet 0.1.2   newbies 2024-03-22 00:19:00
 ## 2 MetaNet 0.1.2   inspect 2024-03-21 01:25:00
-## We need to all, but the latest submission to avoid duplicated in
-## the dashboard.
+## We need the latest submission to avoid duplicated in the dashboard.
 incoming <- incoming[order(incoming$time, decreasing = TRUE), ]
-for (pkg in unique(incoming$package)) {
-  idxs <- which(incoming$package == pkg)
-  ## Drop any but the first
-  if (length(idxs) > 1) incoming <- incoming[-idxs[-1], ]
-}
+incoming <- incoming[!duplicated(incoming$package), , drop = FALSE]
 
 incoming <- incoming[, c("package", "folder")]
 colnames(incoming)[2] <- "cran_incoming"
 
 atrisk <- packages_at_risk()
-atrisk <- merge(atrisk, incoming, 
-                by.x = "Package", by.y = "package", 
+atrisk <- merge(atrisk, incoming,  by.x = "Package", by.y = "package", 
                 all.x = TRUE)
 idxs <- which(!is.na(atrisk$cran_incoming))
 atrisk$event <- NA
-atrisk$event[idxs] <- sprintf('<small><a href="https://nx10.github.io/cransubs/pkg#%s">resubmitted/%s</a></small>', atrisk$Package[idxs], atrisk$cran_incoming[idxs])
+atrisk$event[idxs] <- sprintf('<small><a href="https://nx10.github.io/cransubs/pkg#%s">resubmitted/%s</a></small>', 
+                              atrisk$Package[idxs], atrisk$cran_incoming[idxs])
 
 days <- atrisk$Deadline - Sys.Date()
 days <- ifelse(days == -1, "1 day overdue", ifelse(days < 0, sprintf("%s days overdue", abs(days)), ifelse(days == 0, "today", ifelse(days == 1, "in 1 day", sprintf("in %s days", days)))))
@@ -109,7 +104,9 @@ atrisk$Maintainer <- sub("^([^<]+)<([^ ]+)>.*$", '<a href="mailto:\\2">\\1</a>',
 atrisk$Maintainer <- sub(" +<", "<", atrisk$Maintainer)
 atrisk$Maintainer <- sub("@", "-at-", atrisk$Maintainer)
 atrisk$Links <- sprintf('<a href="https://cran.r-project.org/web/checks/check_results_%s.html">checks</a>', atrisk$Package)
-atrisk$Links <- sprintf('%s<br><a href="%s">url</a>', atrisk$Links, atrisk$URL)
+# Clean urls to only the first one
+urls <- vapply(strsplit(atrisk$URL, split = ",\\s+|\\s+"), function(x){x[1]}, FUN.VALUE = character(1))
+atrisk$Links <- sprintf('%s<br><a href="%s">url</a>', atrisk$Links, urls)
 atrisk$Links <- sprintf('%s<br><a href="%s">url2</a>', atrisk$Links, atrisk$BugReports)
 atrisk$Links <- gsub('<br><a href="NA">url</a>', "", atrisk$Links)
 atrisk$URL <- NULL
