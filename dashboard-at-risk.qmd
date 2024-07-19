@@ -56,7 +56,50 @@ packages_at_risk <- local({
   }
 })
 
+#' @importFrom ciw incoming
+cran_incoming <- local({
+  data <- NULL
+  
+  function() {
+    if (!is.null(data)) return(data)
+    folders <- ciw:::known_folders
+    db <- ciw::incoming(folder = folders, check = FALSE)
+    db <- as.data.frame(db)
+    colnames(db) <- tolower(colnames(db))
+    db$package <- gsub("_.*", "", db$name)
+    db$version <- gsub("(.*_|[.]tar[.]gz)", "", db$name)
+    db <- db[, c("package", "version", "folder", "time")]
+    data <<- db
+    data
+  }
+})
+
+incoming <- cran_incoming()
+
+## NOTE: If the same package is submitted multiple times to CRAN, it may
+## show up as multiple entries in CRAN incoming, e.g.
+## 1 MetaNet 0.1.2   newbies 2024-03-22 00:19:00
+## 2 MetaNet 0.1.2   inspect 2024-03-21 01:25:00
+## We need to all, but the latest submission to avoid duplicated in
+## the dashboard.
+incoming <- incoming[order(incoming$time, decreasing = TRUE), ]
+for (pkg in unique(incoming$package)) {
+  idxs <- which(incoming$package == pkg)
+  ## Drop any but the first
+  if (length(idxs) > 1) incoming <- incoming[-idxs[-1], ]
+}
+
+incoming <- incoming[, c("package", "folder")]
+colnames(incoming)[2] <- "cran_incoming"
+
 atrisk <- packages_at_risk()
+atrisk <- merge(atrisk, incoming, 
+                by.x = "Package", by.y = "package", 
+                all.x = TRUE)
+idxs <- which(!is.na(atrisk$cran_incoming))
+atrisk$event <- NA
+atrisk$event[idxs] <- sprintf('<small><a href="https://nx10.github.io/cransubs/pkg#%s">resubmitted/%s</a></small>', atrisk$Package[idxs], atrisk$cran_incoming[idxs])
+
 days <- atrisk$Deadline - Sys.Date()
 days <- ifelse(days == -1, "1 day overdue", ifelse(days < 0, sprintf("%s days overdue", abs(days)), ifelse(days == 0, "today", ifelse(days == 1, "in 1 day", sprintf("in %s days", days)))))
 atrisk$Deadline <- sprintf("%s<br><small>(%s)</small>", atrisk$Deadline, days)
@@ -74,11 +117,12 @@ atrisk$BugReports <- NULL
 revdeps <- atrisk[["Reverse Packages"]]
 nrevdeps <- lengths(strsplit(revdeps, split = ",", fixed = TRUE))
 nrevdeps[revdeps == ""] <- 0L
-atrisk[["Reverse Packages"]] <- ifelse(nrevdeps == 0, "", sprintf("[n=%d] %s", nrevdeps, revdeps))
+atrisk[["Reverse Packages (n)"]] <- nrevdeps
+atrisk[["Reverse Packages"]] <- ifelse(nrevdeps == 0, "", revdeps)
 atrisk$Package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', atrisk$Package, atrisk$Package)
 colnames(atrisk) <- tolower(colnames(atrisk))
 
-atrisk <- atrisk[, c("deadline", "package", "version", "maintainer", "links", "reverse packages")]
+atrisk <- atrisk[, c("deadline", "package", "version", "maintainer", "links", "reverse packages (n)", "reverse packages", "event")]
 ```
 
 The below table lists `r nrow(atrisk)` R packages that are at risk of being archived[^1] on CRAN, because they have outstanding unresolved issues.
