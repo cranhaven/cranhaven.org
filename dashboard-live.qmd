@@ -82,6 +82,26 @@ cran_incoming <- local({
   }
 })
 
+cran_archive_latest <- local({
+  db <- NULL
+  function(pkg) {
+    if (is.null(db)) {
+      db <<- tools:::CRAN_archive_db()
+    }
+    idx <- match(pkg, names(db))
+    info <- db[[idx]]
+    filenames <- basename(rownames(info))    
+    names <- sub("[.]tar[.]gz$", "", filenames)
+    versions <- sub(sprintf("^%s_", pkg), "", names)
+    versions <- lapply(versions, FUN = package_version)
+    max <- 1L
+    for (kk in seq_along(versions)) {
+      if (versions[[kk]] > versions[[max]]) max <- kk
+    }
+    data.frame(version = versions[[max]], date = as.Date(info$mtime[max]))
+  }
+})
+
 history <- cranhaven_packages()
 incoming <- cran_incoming()
 
@@ -173,13 +193,19 @@ values <- vapply(history$maintainer, FUN.VALUE = NA_character_, FUN = function(v
 values <- unname(values)
 history$maintainer <- values
 
-history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', history$package, history$package)
+package_meta <- vapply(history$package, FUN.VALUE = "", FUN = function(pkg) {
+  info <- cran_archive_latest(pkg)
+  sprintf("%s<br><small>(%s)</small>", as.character(info$version), format(info$date, format = "%F"))
+})
+
+history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a> %s', history$package, history$package, package_meta)
+
 
 age <- difftime(Sys.Date(), history$date, units = "days")
 age_label <- sprintf("%s&nbsp;days&nbsp;ago", age)
 age_label[age == 1] <- "1&nbsp;day&nbsp;ago"
 age_label[age == 0] <- "today"
-history$date <- sprintf("%s <small>(%s)</small>", history$date, age_label)
+history$date <- sprintf("%s<br><small>(%s)</small>", history$date, age_label)
 
 history <- history[, c("date", "package", "event", "reason", "maintainer", "links")]
 
