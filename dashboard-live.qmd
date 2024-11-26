@@ -89,6 +89,11 @@ cran_archive_latest <- local({
       db <<- tools:::CRAN_archive_db()
     }
     idx <- match(pkg, names(db))
+    if (is.na(idx)) {
+      ## Should not happen, but did happen to 'cycleRtools', which
+      ## vanished on 2024-11-25
+      return(data.frame(version = package_version("-1", strict = FALSE), date = as.Date(NA)))
+    }
     info <- db[[idx]]
     filenames <- basename(rownames(info))    
     names <- sub("[.]tar[.]gz$", "", filenames)
@@ -145,19 +150,24 @@ if (length(idxs) > 0) {
   for (idx in idxs) {
     pkg <- history$package[idx]
     url <- sprintf("https://cran.r-project.org/package=%s", pkg)
-    bfr <- readLines(url, warn = FALSE)
-    has_returned <- !any(grepl("was removed from the CRAN repository", bfr))
-    if (has_returned) {
-      history$package[idx] <- NA_character_
-    } else {
+    bfr <- tryCatch(readLines(url, warn = FALSE), error = identity)
+    if (inherits(bfr, "error")) {
+      ## Should not happen, but did happen to
+      ## https://cran.r-project.org/package=cycleRtools on 2024-11-25
       history$event[idx] <- "?"
-      history$reason[idx] <- "CRANhaven cannot currently infer status."
+      history$reason[idx] <- "CRANhaven cannot currently infer status, because CRAN package page is missing."
+    } else {
+      has_returned <- !any(grepl("was removed from the CRAN repository", bfr))
+      if (has_returned) {
+        history$package[idx] <- NA_character_
+      } else {
+        history$event[idx] <- "?"
+        history$reason[idx] <- "CRANhaven cannot currently infer status."
+      }
     }
   }
   history <- subset(history, !is.na(package))
 }
-
-
 
 links <- with(history, paste(
   sprintf('<a href="https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html">checks</a>', sub("-.*", "", date), date, package),
