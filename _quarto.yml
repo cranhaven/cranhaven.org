@@ -28,6 +28,7 @@ website:
 
   margin-header: |
     <a href="https://cranhaven.r-universe.dev/builds"><img src="https://cranhaven.r-universe.dev/badges/:total" alt="CRANhaven number of packages"/></a>
+    <a href="https://github.com/CRANhaven/cranhaven.r-universe.dev/actions/workflows/update.yml"><img src="https://github.com/CRANhaven/cranhaven.r-universe.dev/actions/workflows/update.yml/badge.svg" alt=""/></a>
 
   repo-url: https://github.com/cranhaven/cranhaven.org/
   repo-actions: [source, edit, issue]
