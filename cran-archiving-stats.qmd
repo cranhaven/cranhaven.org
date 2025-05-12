@@ -23,6 +23,10 @@ if (!requireNamespace("cransays")) {
   if (!requireNamespace("remotes")) install.packages("remotes")
   remotes::install_github("r-hub/cransays")
 }
+if (!requireNamespace("repo.data")) {
+  if (!requireNamespace("remotes")) install.packages("remotes")
+  remotes::install_github("llrs/repo.data")
+}
 ```
 
 CRAN packages are archived all the time, but a large portion of them
@@ -45,100 +49,35 @@ for packages that have ever been archived, removed, orphaned, etc.
 ```{r cran-history, echo = FALSE}
 # Searches packages in PACKAGES.in file and extracts relevant information.
 library("dplyr")
+library("repo.data")
 options(repos ="https://cloud.r-project.org")
 Sys.setLanguage("en")
 
-url <- "https://cran.r-project.org/src/contrib/PACKAGES.in"
-con <- url(url)
-file <- read.dcf(con) |> 
-  as.data.frame()
-
-# Extract multiline comments
-comments_l <- lapply(file$`X-CRAN-Comment`, function(x) {
-  trimws(unlist(strsplit(x, "[\n]+"), FALSE, FALSE))
-})
-comments_c <- unlist(comments_l, FALSE, FALSE)
-df <- data.frame(package = rep(file$Package, lengths(comments_l)),
-                 comment = comments_c)
-regex_date <- "([0-9]{4}-[0-9]{2}-[0-9]{2})"
-regex_action <- "([Uu]narchived?|[Aa]rchived?|[Rr]enamed?|[Oo]rphaned?|[Rr]eplaced?|[Rr]emoved?)"
-comments_df <- cbind(df, 
-                     strcapture(pattern = regex_date, x = df$comment, 
-                                proto = data.frame(date = Sys.Date()[0])),
-                     strcapture(pattern = regex_action, x = df$comment,
-                                proto = data.frame(action = character()))
-) |> 
-  filter(!is.na(comment)) |> 
-  mutate(action = tolower(action))
-# Check that count(comments_df, !is.na(date), !is.na(action), sort = TRUE) makes sense
-# Handle rolled and no keyword used
-comments_df$action[!is.na(comments_df$date) & is.na(comments_df$action)] <- "archived"
-
-# filter(comments_df, !is.na(action) & is.na(date)) |> count(tolower(comment)) |> View("a")
-# filter(comments_df, is.na(action) & is.na(date)) |> count(tolower(comment)) |> View("b")
-# Handle CRAN-history
-history_l <- lapply(file$`X-CRAN-History`, function(x) {
-  trimws(unlist(strsplit(x, "[\n]+"), FALSE, FALSE))
-})
-history_c <- unlist(history_l)
-
-history_df <- data.frame(package = rep(file$Package, lengths(history_l)),
-                         comment = history_c) |> 
-  filter(!is.na(comment))
-
-history_df <- cbind(history_df,
-                    strcapture(pattern = regex_date, x = history_df$comment, 
-                               proto = data.frame(date = Sys.Date()[0])),
-                    strcapture(pattern = regex_action, x = history_df$comment,
-                               proto = data.frame(action = character()))
-) |> 
-  mutate(action = tolower(action))
-history_df$action[grep("Back on CRAN", history_df$comment, ignore.case = TRUE)] <- "unarchived"
-
-full_history <- rbind(comments_df, history_df) |>
-  ## Manually fix typos
-  mutate(action = gsub(pattern = "e$", replacement = "ed", action)) |> 
-  arrange(package) |>
-  relocate(date) |>
-  relocate(comment, .after = last_col())
-# Keeping only the history with a recognized event (even if it is not interesting)
-history <- filter(full_history, 
+cran_comments <- cran_comments()
+history <- filter(cran_comments, 
                   !is.na(action),
                   !is.na(date)) 
 ```
 
 ```{r search-cran-archive, echo = FALSE}
+
+
 archive <- tools:::CRAN_archive_db()
+
 pkges <- unique(history$package[history$action %in% c("archived", "unarchived")])
+pkg_history <- cran_archive(pkges)
+pkg_history$date <- as.Date(pkg_history$Datetime)
+pkg_history$action <- "accepted"
+pkgs_history <- pkg_history[, c("Package", "date", "action")]
+colnames(pkgs_history)[1] <- "package"
 
-# packages in archive
-pkgs <- intersect(pkges, names(archive))
-# all_other <- intersect(names(archive), pkges)
-# lapply(archive[all_other], function(x)x[1, ])
-relevant_archive <- archive[pkgs]
-archive_df <- do.call(rbind, relevant_archive)
-
-archives <- vapply(relevant_archive, nrow, numeric(1))
-pkg <- rep(names(relevant_archive), times = archives)
-archive_df$package <- pkg
-
-current <- tools:::CRAN_current_db()
-current_packages <- gsub("(.*)_.*\\.tar\\.gz$", "\\1", 
-                                 rownames(current))
-current$package <- current_packages
-relevant_current <- current[current$package %in% pkgs, ]
-
-packages <- rbind(archive_df, relevant_current) |> 
-  mutate(date = as.Date(mtime), action = "accepted") |> 
-  arrange(package, date) |> 
-  select(date, package, action)
-
-rownames(packages) <- NULL
+# TODO Continue here
+# FIXME Remove unnecessary code on this code chunk since we have pkg_history
 ```
 
 ```{r merge, echo = FALSE}
 # Merge history and packages in archive
-pkg_history <- merge(packages, history, all = TRUE, sort = FALSE) |> 
+pkg_history <- merge(pkgs_history, history, all = TRUE, sort = FALSE) |> 
   arrange(package, date) 
 ```
 
@@ -279,15 +218,15 @@ Those with three different actions imply that there has been multiple
 revisions from the CRAN Team on the same day.
 
 ```{r current}
-all_packages <- unique(c(current_packages, names(archive)))
+all_packages <- unique(cran_archive()$Package)
 # length(all_packages)
 # To account for packages removed too:
 all_packages2 <- unique(c(all_packages, pkg_history$package))
 # length(all_packages2)
 
-# packages_removed <- out |> 
-#   filter(action == "removed") |> 
-#   distinct(package) |> 
+# packages_removed <- out |>
+#   filter(action == "removed") |>
+#   distinct(package) |>
 #   pull(package)
 # setdiff(packages_removed, all_packages2)
 # setdiff(packages_removed, all_packages) |> length()
@@ -602,8 +541,8 @@ archived_all_versions |>
   coord_cartesian(xlim =  c(0, 365), expand = FALSE) +
   scale_y_continuous(labels = scales::label_percent(), 
                      sec.axis = dup_axis(name = element_blank())) +
-  geom_arrow_segment(y = 0.5, x = 0, xend = 30, col = "red", linewidth = 2) + 
-  geom_arrow_segment(y = 0.5, x = 30, yend = 0, col = "red", linewidth = 2) + 
+  geom_arrow_segment(y = 0.5, x = 0, xend = 35, col = "red", linewidth = 2) + 
+  geom_arrow_segment(y = 0.5, x = 35, yend = 0, col = "red", linewidth = 2) + 
   scale_x_continuous(breaks = c(0, 30*1:12)) +
   theme_minimal() +
   labs(title = "Time for packages to be back on CRAN",
@@ -686,7 +625,7 @@ archived_all_versions |>
 #|  Presented is the cumulative number of such events over time on the linear
 #|  (left) and the logarithmic (right) scale."
 library("patchwork")
-p_type <- full_history |> 
+p_type <- cran_comments |> 
   filter(!is.na(action), !is.na(date)) |> 
   arrange(date) |> 
   select(-comment) |> 
@@ -949,7 +888,7 @@ resubm_t +
 ```{r resubmissions}
 # We only have data of submissions since 2020-09-12:
 # min(cdh$snapshot_time) === start_archive
-sample_size <- sum(!archived_all$before_registry)/nrow(archived_all)
+sample_size <- sum(!archived_all$before_registry, na.rm = TRUE)/nrow(archived_all)
 # `% submitted` = events/sum(events[!before_registry & new_submission]),
 #          `% submitted` = if_else(!(!before_registry & new_submission), NA, `% submitted`),
 #          `% submitted` = scales::percent(`% submitted`)
