@@ -1190,7 +1190,7 @@ archived_all_versions |>
        title = "Age of packages archived")
 ```
 
-Age of packages archived is increasing, sometimes changes in TODO
+Age of packages archived is increasing.
 
 ```{r aged-public2}
 #| fig-cap: "**Figure: Time since previous releases of packages being archived.** Almost
