@@ -108,7 +108,7 @@ atrisk$Links <- sprintf('<a href="https://cran.r-project.org/web/checks/check_re
 urls <- vapply(strsplit(atrisk$URL, split = ",\\s+|\\s+"), function(x){x[1]}, FUN.VALUE = character(1))
 atrisk$Links <- sprintf('%s<br><a href="%s">url</a>', atrisk$Links, urls)
 atrisk$Links <- sprintf('%s<br><a href="%s">url2</a>', atrisk$Links, atrisk$BugReports)
-atrisk$Links <- gsub('<br><a href="NA">url</a>', "", atrisk$Links)
+atrisk$Links <- gsub('<br><a href="NA">url2?</a>', "", atrisk$Links)
 atrisk$URL <- NULL
 atrisk$BugReports <- NULL
 revdeps <- atrisk[["Reverse Packages"]]
