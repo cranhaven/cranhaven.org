@@ -2,6 +2,9 @@ SHELL=bash
 
 all: preview
 
+install:
+	Rscript -e "install.packages('ciw')"
+
 assert_quarto:
 	@command -v quarto || { >&2 echo "Cannot find 'quarto' (https://quarto.org/docs/get-started/)"; exit 1; }
 

@@ -176,7 +176,7 @@ links <- with(history, paste(
 ))
 
 values <- vapply(history$package_url, FUN.VALUE = NA_character_, FUN = function(url) {
-  if (is.na(url)) return(url)
+  if (is.na(url) || !nzchar(url)) return(url)
   url <- strsplit(url, split = ",")[[1]]
   url <- gsub("(^[[:space:]]+|[[:space:]]+$)", "", url)
   names(url) <- sprintf("url%d", seq_along(url))
