@@ -103,7 +103,8 @@ atrisk$Published <- NULL
 atrisk$Maintainer <- sub("^([^<]+)<([^ ]+)>.*$", '<a href="mailto:\\2">\\1</a>', atrisk$Maintainer)
 atrisk$Maintainer <- sub(" +<", "<", atrisk$Maintainer)
 atrisk$Maintainer <- sub("@", "-at-", atrisk$Maintainer)
-atrisk$Links <- sprintf('<a href="https://cran.r-project.org/web/checks/check_results_%s.html">checks</a>', atrisk$Package)
+atrisk$Links <- sprintf('<a href="https://cran.r-project.org/web/checks/check_results_%s.html"><img src="https://badges.cranchecks.info/worst/%s.svg" alt="CRAN check worst result for package %s"></a>', atrisk$Package, atrisk$Package, atrisk$Package)
+
 # Clean urls to only the first one
 urls <- vapply(strsplit(atrisk$URL, split = ",\\s+|\\s+"), function(x){x[1]}, FUN.VALUE = character(1))
 atrisk$Links <- sprintf('%s<br><a href="%s">url</a>', atrisk$Links, urls)
@@ -116,7 +117,8 @@ nrevdeps <- lengths(strsplit(revdeps, split = ",", fixed = TRUE))
 nrevdeps[revdeps == ""] <- 0L
 atrisk[["Reverse Packages (n)"]] <- nrevdeps
 atrisk[["Reverse Packages"]] <- ifelse(nrevdeps == 0, "", revdeps)
-atrisk$Package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a>', atrisk$Package, atrisk$Package)
+atrisk$Package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a><br><img src="https://cranlogs.r-pkg.org/badges/last-month/%s" alt="Number of downloads during the last month for package %s">', atrisk$Package, atrisk$Package, atrisk$Package, atrisk$Package)
+
 colnames(atrisk) <- tolower(colnames(atrisk))
 
 atrisk <- atrisk[, c("deadline", "package", "version", "maintainer", "links",
