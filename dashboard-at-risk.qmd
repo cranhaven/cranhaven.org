@@ -9,6 +9,7 @@ execute:
 tr { vertical-align: top; }
 </style>
 
+  
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -113,10 +114,13 @@ atrisk$Links <- gsub('<br><a href="NA">url2?</a>', "", atrisk$Links)
 atrisk$URL <- NULL
 atrisk$BugReports <- NULL
 revdeps <- atrisk[["Reverse Packages"]]
-nrevdeps <- lengths(strsplit(revdeps, split = ",", fixed = TRUE))
-nrevdeps[revdeps == ""] <- 0L
+revdeps <- strsplit(revdeps, split = ",", fixed = TRUE)
+nrevdeps <- lengths(revdeps)
 atrisk[["Reverse Packages (n)"]] <- nrevdeps
-atrisk[["Reverse Packages"]] <- ifelse(nrevdeps == 0, "", revdeps)
+revdeps <- vapply(revdeps, FUN = function(pkgs) {
+  paste(pkgs, collapse = ", ")
+}, FUN.VALUE = "")
+atrisk[["Reverse Packages"]] <- revdeps
 atrisk$Package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a><br><img src="https://cranlogs.r-pkg.org/badges/last-month/%s" alt="Number of downloads during the last month for package %s">', atrisk$Package, atrisk$Package, atrisk$Package, atrisk$Package)
 
 colnames(atrisk) <- tolower(colnames(atrisk))
@@ -147,6 +151,7 @@ datatable(atrisk,
   )
 )
 ```
+
 
 [CRAN archive area]: https://cran.r-project.org/src/contrib/Archive/
 [CRAN mirror on R-universe]: https://cran.r-universe.dev/builds
