@@ -208,7 +208,7 @@ package_meta <- vapply(history$package, FUN.VALUE = "", FUN = function(pkg) {
   sprintf("%s<br><small>(%s)</small>", as.character(info$version), format(info$date, format = "%F"))
 })
 
-history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a> %s', history$package, history$package, package_meta)
+history$package <- sprintf('<a href="https://cran.r-project.org/package=%s">%s</a> %s<br><img src="https://cranlogs.r-pkg.org/badges/last-month/%s" alt="Number of downloads during the last month for package %s">', history$package, history$package, package_meta, history$package, history$package)
 
 
 age <- difftime(Sys.Date(), history$date, units = "days")
