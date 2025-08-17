@@ -143,6 +143,7 @@ idxs <- which(!is.na(history$x_cran_history))
 history$reason[idxs] <- paste(history$reason[idxs], sprintf("<br><small><em>Previously</em>: %s</small>", gsub("\n", " ", history$x_cran_history[idxs])), sep = ". ")
 history$reason[-idxs] <- paste0(history$reason[-idxs], ".")
 history$reason <- gsub("[.]+", ".", history$reason)
+history$reason <- gsub(",[.]", ".", history$reason)
 
 ## SPECIAL CASE: Package has just returned to CRAN?
 idxs <- which(is.na(history$event))
