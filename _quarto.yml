@@ -40,6 +40,12 @@ format:
     theme: cosmo
     css: styles.css
     toc: true
+    page-layout: full
+    grid:
+      body-width: 1000px
+      sidebar-width: 50px
+      margin-width: 250px
+      gutter-width: 1.5em
 
 execute:
   freeze: auto
