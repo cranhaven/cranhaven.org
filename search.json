@@ -1,19 +1,5 @@
 [
   {
-    "objectID": "dashboard-live.html",
-    "href": "dashboard-live.html",
-    "title": "Dashboard: Recently Archived CRAN Packages",
-    "section": "",
-    "text": "The below table lists all 81 R packages that are no longer on CRAN, because they have been either archived1 on or removed2 from CRAN during the last 35 days. These packages can be installed using:\nThe table shows the date when a package was dropped by CRAN and their reason3 for it. If a package has since been resubmitted and is waiting in the CRAN incoming queue, it is marked as “resubmitted” (in the ‘event’ column; currently 7 packages). Links to the most recent CRAN checks and the source code are also provided. If a package does not return to CRAN within 35 days, it is removed also from CRANhaven4."
-  },
-  {
-    "objectID": "dashboard-live.html#footnotes",
-    "href": "dashboard-live.html#footnotes",
-    "title": "Dashboard: Recently Archived CRAN Packages",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is a rare event, the removed package version is completely removed from CRAN, and no longer available for download. Earlier versions might be available in the CRAN archive area.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
-  },
-  {
     "objectID": "dashboard-at-risk.html",
     "href": "dashboard-at-risk.html",
     "title": "Dashboard: Packages At-Risk of Being Archived",
@@ -26,6 +12,27 @@
     "title": "Dashboard: Packages At-Risk of Being Archived",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎"
+  },
+  {
+    "objectID": "dashboard-live.html",
+    "href": "dashboard-live.html",
+    "title": "Dashboard: Recently Archived CRAN Packages",
+    "section": "",
+    "text": "The below table lists all 81 R packages that are no longer on CRAN, because they have been either archived1 on or removed2 from CRAN during the last 35 days. These packages can be installed using:\nThe table shows the date when a package was dropped by CRAN and their reason3 for it. If a package has since been resubmitted and is waiting in the CRAN incoming queue, it is marked as “resubmitted” (in the ‘event’ column; currently 6 packages). Links to the most recent CRAN checks and the source code are also provided. If a package does not return to CRAN within 35 days, it is removed also from CRANhaven4."
+  },
+  {
+    "objectID": "dashboard-live.html#footnotes",
+    "href": "dashboard-live.html#footnotes",
+    "title": "Dashboard: Recently Archived CRAN Packages",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is a rare event, the removed package version is completely removed from CRAN, and no longer available for download. Earlier versions might be available in the CRAN archive area.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
   },
   {
     "objectID": "cran-archiving-stats.html",
@@ -89,12 +96,5 @@
     "title": "CRANhaven",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nCRANhaven is served via R-universe. The “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.↩︎\nThe five-week limit is based on our results showing that the median time for a package to return to CRAN is 30 days.↩︎"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site"
   }
 ]
