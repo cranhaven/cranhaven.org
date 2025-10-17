@@ -1,19 +1,5 @@
 [
   {
-    "objectID": "dashboard-at-risk.html",
-    "href": "dashboard-at-risk.html",
-    "title": "Dashboard: Packages At-Risk of Being Archived",
-    "section": "",
-    "text": "The below table lists 474 R packages that are at risk of being archived1 on CRAN, because they have outstanding unresolved issues.\nSome of them might have already submitted a new version to fix the issues identified by CRAN (check the event column)."
-  },
-  {
-    "objectID": "dashboard-at-risk.html#footnotes",
-    "href": "dashboard-at-risk.html#footnotes",
-    "title": "Dashboard: Packages At-Risk of Being Archived",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎"
-  },
-  {
     "objectID": "dashboard-live.html",
     "href": "dashboard-live.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
@@ -28,11 +14,18 @@
     "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎\nWhen a package is removed, which is a rare event, the removed package version is completely removed from CRAN, and no longer available for download. Earlier versions might be available in the CRAN archive area.↩︎\nThe reason, which is based on the CRAN Repository Policy, is extracted from CRAN’s manually curated PACKAGES.in database.↩︎\nIf a package falls off also CRANhaven, it may still be installable from the CRAN mirror on R-universe.↩︎"
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "dashboard-at-risk.html",
+    "href": "dashboard-at-risk.html",
+    "title": "Dashboard: Packages At-Risk of Being Archived",
     "section": "",
-    "text": "About this site"
+    "text": "The below table lists 474 R packages that are at risk of being archived1 on CRAN, because they have outstanding unresolved issues.\nSome of them might have already submitted a new version to fix the issues identified by CRAN (check the event column)."
+  },
+  {
+    "objectID": "dashboard-at-risk.html#footnotes",
+    "href": "dashboard-at-risk.html#footnotes",
+    "title": "Dashboard: Packages At-Risk of Being Archived",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nWhen a package is archived, the archived version is still available in the CRAN archive area together with all previous versions.↩︎"
   },
   {
     "objectID": "cran-archiving-stats.html",
@@ -96,5 +89,12 @@
     "title": "CRANhaven",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nCRANhaven is served via R-universe. The “Commit” datestamps seen on R-universe show the dates (±1 day) when the packages were archived on CRAN.↩︎\nThe five-week limit is based on our results showing that the median time for a package to return to CRAN is 30 days.↩︎"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site"
   }
 ]
