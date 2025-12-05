@@ -4,7 +4,7 @@
     "href": "dashboard-live.html",
     "title": "Dashboard: Recently Archived CRAN Packages",
     "section": "",
-    "text": "The below table lists all 178 R packages that are no longer on CRAN, because they have been either archived1 on or removed2 from CRAN during the last 35 days. These packages can be installed using:\nThe table shows the date when a package was dropped by CRAN and their reason3 for it. If a package has since been resubmitted and is waiting in the CRAN incoming queue, it is marked as “resubmitted” (in the ‘event’ column; currently 10 packages). Links to the most recent CRAN checks and the source code are also provided. If a package does not return to CRAN within 35 days, it is removed also from CRANhaven4."
+    "text": "The below table lists all 177 R packages that are no longer on CRAN, because they have been either archived1 on or removed2 from CRAN during the last 35 days. These packages can be installed using:\nThe table shows the date when a package was dropped by CRAN and their reason3 for it. If a package has since been resubmitted and is waiting in the CRAN incoming queue, it is marked as “resubmitted” (in the ‘event’ column; currently 10 packages). Links to the most recent CRAN checks and the source code are also provided. If a package does not return to CRAN within 35 days, it is removed also from CRANhaven4."
   },
   {
     "objectID": "dashboard-live.html#footnotes",
