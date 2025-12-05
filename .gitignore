@@ -4,3 +4,5 @@ _site/
 .Rhistory
 _freeze/site_libs/
 .Rproj.user
+
+**/*.quarto_ipynb

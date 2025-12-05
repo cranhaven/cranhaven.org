@@ -171,6 +171,7 @@ if (length(idxs) > 0) {
 }
 
 links <- with(history, paste(
+  sprintf('<a href="https://cranhaven.r-universe.dev/%s">CRANhaven</a>', package),
   sprintf('<a href="https://cran-archive.r-project.org/web/checks/%s/%s_check_results_%s.html">checks</a>', sub("-.*", "", date), date, package),
   sprintf('<a href="https://github.com/cran/%s">source</a>', package),
   sep = ", "
