@@ -18,7 +18,7 @@
     "href": "dashboard-at-risk.html",
     "title": "Dashboard: Packages At-Risk of Being Archived",
     "section": "",
-    "text": "The below table lists 459 R packages that are at risk of being archived1 on CRAN, because they have outstanding unresolved issues.\nSome of them might have already submitted a new version to fix the issues identified by CRAN (check the event column)."
+    "text": "The below table lists 460 R packages that are at risk of being archived1 on CRAN, because they have outstanding unresolved issues.\nSome of them might have already submitted a new version to fix the issues identified by CRAN (check the event column)."
   },
   {
     "objectID": "dashboard-at-risk.html#footnotes",
